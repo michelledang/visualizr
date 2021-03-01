@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { AudioContext } from 'standardized-audio-context';
-import SpotifyPlayer from 'react-spotify-web-playback';
+// import SpotifyPlayer from 'react-spotify-web-playback';
 
 export default function Home() {
   var audioContext;
@@ -102,39 +102,39 @@ export default function Home() {
   };
 
   // this doesn't work lol
-  const spotifySetup = () => {
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
+  // const spotifySetup = () => {
+  //   audioContext = new AudioContext();
+  //   analyser = audioContext.createAnalyser();
 
-    navigator.mediaDevices
-      // @ts-ignore
-      .getDisplayMedia({
-        video: true,
-        audio: true,
-      })
-      .then((stream) => {
-        if (stream.getVideoTracks().length > 0) {
-          var source = audioContext.createMediaStreamSource(stream);
-          source.connect(analyser);
+  //   navigator.mediaDevices
+  //     // @ts-ignore
+  //     .getDisplayMedia({
+  //       video: true,
+  //       audio: true,
+  //     })
+  //     .then((stream) => {
+  //       if (stream.getVideoTracks().length > 0) {
+  //         var source = audioContext.createMediaStreamSource(stream);
+  //         source.connect(analyser);
 
-          document.body.classList.add('ready');
-        } else {
-          console.log(
-            'Failed to get stream. Audio not shared or browser not supported'
-          );
-        }
-      })
-      .catch((err) => console.log('Unable to open capture: ', err));
+  //         document.body.classList.add('ready');
+  //       } else {
+  //         console.log(
+  //           'Failed to get stream. Audio not shared or browser not supported'
+  //         );
+  //       }
+  //     })
+  //     .catch((err) => console.log('Unable to open capture: ', err));
 
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
+  //   analyser.fftSize = 2048;
+  //   var bufferLength = analyser.frequencyBinCount;
+  //   dataArray = new Uint8Array(bufferLength);
 
-    analyser.getByteTimeDomainData(dataArray);
-    console.log(dataArray);
+  //   analyser.getByteTimeDomainData(dataArray);
+  //   console.log(dataArray);
 
-    draw();
-  };
+  //   draw();
+  // };
 
   return (
     <Wrapper>
@@ -142,17 +142,17 @@ export default function Home() {
       <StyledButton onClick={generateSineWave}>sine wave</StyledButton>
       <StyledButton onClick={exampleSetup}>example setup</StyledButton>
       <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
-      <StyledButton onClick={spotifySetup}>spotify setup</StyledButton>
+      {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
       <canvas
         id="visualization"
         width={WIDTH}
         height={HEIGHT}
         style={{ marginTop: '50px' }}
       ></canvas>
-      <SpotifyPlayer
+      {/* <SpotifyPlayer
         token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
         uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
-      />
+      /> */}
     </Wrapper>
   );
 }
