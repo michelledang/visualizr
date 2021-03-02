@@ -1,12 +1,21 @@
 import styled from 'styled-components';
 import { AudioContext } from 'standardized-audio-context';
 // import SpotifyPlayer from 'react-spotify-web-playback';
+import { useState } from 'react';
+import THEMES from '../data/themes';
 
-export default function Home() {
+export default function Home(props) {
   var audioContext;
   var analyser, dataArray, canvas, ctx;
-  const WIDTH = 1000;
-  const HEIGHT = 100;
+  const WIDTH = 500;
+  const HEIGHT = 200;
+
+  const [isWaveform, setIsWaveform] = useState(true);
+  const { selectTheme } = props;
+
+  const handleVisualizationToggle = (event) => {
+    setIsWaveform(event.target.checked);
+  }
 
   const draw = () => {
     canvas = document.getElementById('visualization');
@@ -14,12 +23,16 @@ export default function Home() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     var drawVisual = requestAnimationFrame(draw);
-    analyser.getByteTimeDomainData(dataArray);
+    if (isWaveform) {
+      analyser.getByteTimeDomainData(dataArray); //waveform data
+    } else {
+      analyser.getByteFrequencyData(dataArray); //frequency data
+    }
 
-    ctx.fillStyle = '#36eb7b';
+    ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgb(0, 0, 0)';
+    ctx.strokeStyle = props.theme.secondary;
     ctx.beginPath();
 
     const BUFFER_LEN = dataArray.length;
@@ -51,7 +64,7 @@ export default function Home() {
   };
 
   const exampleSetup = () => {
-    var stream = new Audio('/audio/square.wav');
+    var stream = new Audio('/audio/file1.mp3');
     stream.play();
 
     audioContext = new AudioContext();
@@ -95,15 +108,11 @@ export default function Home() {
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
-    analyser.getByteTimeDomainData(dataArray); //waveform data
-    // analyser.getByteFrequencyData(dataArray); //frequency data
-    console.log(dataArray);
-
     draw();
   };
 
   // this doesn't work lol
-  // const spotifySetup = () => {
+  const spotifySetup = () => {
   //   audioContext = new AudioContext();
   //   analyser = audioContext.createAnalyser();
 
@@ -135,38 +144,63 @@ export default function Home() {
   //   console.log(dataArray);
 
   //   draw();
-  // };
+  };
 
   return (
     <Wrapper>
-      <Title>Visualizer</Title>
-      <StyledButton onClick={generateSineWave}>sine wave</StyledButton>
-      <StyledButton onClick={exampleSetup}>example setup</StyledButton>
-      <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
-      {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
-      <canvas
+      <Title>visualizer</Title>
+      <StyledCanvas
         id="visualization"
         width={WIDTH}
         height={HEIGHT}
-        style={{ marginTop: '50px' }}
-      ></canvas>
-      {/* <SpotifyPlayer
-        token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
-        uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
-      /> */}
-    </Wrapper>
+      ></StyledCanvas>
+      <SettingsWrapper>
+        <StyledButton onClick={exampleSetup}>example file setup</StyledButton>
+        <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
+        {/* <StyledButton onClick={generateSineWave}>sine wave</StyledButton> */}
+        {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
+        <InputWrapper>
+          <label>Theme: </label>
+          <StyledSelect id="themes" name="themes" onChange={selectTheme}>
+            {Object.keys(THEMES).map(key => {
+              return <option value={key}>{THEMES[key].name}</option>;
+            })}
+          </StyledSelect>
+        </InputWrapper>
+        <InputWrapper>
+          <label>isWaveform: </label>
+          <input
+            name="visualization-type"
+            type="checkbox"
+            checked={isWaveform}
+            onChange={handleVisualizationToggle} />
+        </InputWrapper>
+        {/* <SpotifyPlayer
+          token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
+          uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
+        /> */}
+      </SettingsWrapper>
+      </Wrapper>
   );
 }
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
+  height: 100%;
+`;
+
+const SettingsWrapper = styled.div`
+  width: 800px;
+  display: flex;
+  align-self: center;
+  justify-content: space-around;
 `;
 
 const Title = styled.h1`
   font-size: 50px;
   text-align: center;
-  color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.primary};
 `;
 
 const StyledButton = styled.button`
@@ -174,4 +208,31 @@ const StyledButton = styled.button`
   width: fit-content;
   align-self: center;
   margin: 10px;
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.secondary};
+  border-radius: 12px;
+  padding: 8px 20px;
+`;
+
+const InputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.background};
+`;
+
+const StyledCanvas = styled.canvas`
+  margin: 0 0 20px 0;
+`;
+
+const StyledSelect = styled.select`
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.background};
+  margin-left: 4px;
+  border: 1px solid ${({ theme }) => theme.secondary};
+  border-radius: 12px;
+  padding: 7px 8px;
 `;
