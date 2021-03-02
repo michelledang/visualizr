@@ -16,7 +16,7 @@ export default function Home() {
   const HEIGHT = 100;
   
   const exampleSetup = () => {
-    var stream = new Audio('/audio/file1.mp3');
+    var stream = new Audio('/audio/square.wav');
     stream.play();
 
     audioContext = new AudioContext();
@@ -36,7 +36,8 @@ export default function Home() {
     
     function draw() {
       var drawVisual = requestAnimationFrame(draw);
-      analyser.getByteTimeDomainData(dataArray);
+      // analyser.getByteTimeDomainData(dataArray); //waveform data
+      analyser.getByteFrequencyData(dataArray); //frequency data
   
       ctx.fillStyle = '#36eb7b';
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
