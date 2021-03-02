@@ -160,7 +160,7 @@ export default function Home(props) {
         {/* <StyledButton onClick={generateSineWave}>sine wave</StyledButton> */}
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
         <InputWrapper>
-          <label>Theme: </label>
+          <label>theme: </label>
           <StyledSelect id="themes" name="themes" onChange={selectTheme}>
             {Object.keys(THEMES).map(key => {
               return <option value={key}>{THEMES[key].name}</option>;
@@ -198,7 +198,7 @@ const SettingsWrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 50px;
+  font-size: 40px;
   text-align: center;
   color: ${({ theme }) => theme.primary};
 `;

@@ -16,8 +16,22 @@ export default {
     sakura: {
       name: 'Sakura',
       background: '#ff98ac',
-      primary: '#de1d57',
-      secondary: '#efefef',
+      primary: '#efefef',
+      secondary: '#de1d57',
       tertiary: '#917075'
-    }
+    },
+    olivia: {
+      name: 'GMK Olivia',
+      background: '#363434',
+      primary: '#e8c4b8',
+      secondary: '#fafafa',
+      tertiary: '#fafafa'
+    },
+    mizu: {
+      name: 'GMK Mizu',
+      background: '#253746',
+      primary: '#fafafa',
+      secondary: '#b9d9eb',
+      tertiary: '#a5c1d1'
+    },
 };
