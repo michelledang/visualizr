@@ -7,8 +7,8 @@ import THEMES from '../data/themes';
 export default function Home(props) {
   var audioContext;
   var analyser, dataArray, canvas, ctx;
-  const WIDTH = 500;
-  const HEIGHT = 200;
+  const WIDTH = 1000;
+  const HEIGHT = 350;
 
   const [isWaveform, setIsWaveform] = useState(true);
   const { selectTheme } = props;
@@ -17,12 +17,20 @@ export default function Home(props) {
     setIsWaveform(event.target.checked);
   }
 
-  const draw = () => {
+  const drawOscillator = () => {
     canvas = document.getElementById('visualization');
     ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    var drawVisual = requestAnimationFrame(draw);
+    // use a delay for waveform only
+    if (isWaveform) {
+      setTimeout(() => {
+        var drawVisual = requestAnimationFrame(drawOscillator);
+      }, 100);
+    } else {
+      var drawVisual = requestAnimationFrame(drawOscillator);
+    }
+
     if (isWaveform) {
       analyser.getByteTimeDomainData(dataArray); //waveform data
     } else {
@@ -40,8 +48,13 @@ export default function Home(props) {
     var x = 0;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      var v = dataArray[i] / 128.0;
-      var y = (v * HEIGHT) / 2;
+      if (isWaveform) {
+        var v = dataArray[i] / 128.0;
+        var y = (v * HEIGHT) / 2;
+      } else {
+        var v = dataArray[i] / 400.0;
+        var y = (v * HEIGHT) / 2 + 50.0;
+      }
 
       if (i === 0) {
         ctx.moveTo(x, y);
@@ -55,6 +68,49 @@ export default function Home(props) {
     ctx.lineTo(WIDTH, HEIGHT / 2);
     ctx.stroke();
   };
+
+  const drawBar = () => {
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // use a delay for waveform only
+    if (isWaveform) {
+      setTimeout(() => {
+        var drawVisual = requestAnimationFrame(drawBar);
+      }, 100);
+    } else {
+      var drawVisual = requestAnimationFrame(drawBar);
+    }
+
+    if (isWaveform) {
+      analyser.getByteTimeDomainData(dataArray); //waveform data
+    } else {
+      analyser.getByteFrequencyData(dataArray); //frequency data
+    }
+
+    ctx.fillStyle = props.theme.background;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    
+    const BUFFER_LEN = dataArray.length;
+    var barWidth = (WIDTH / BUFFER_LEN) * 20;
+    var barHeight;
+    var x = 0;
+
+    for (var i = 0; i < BUFFER_LEN; i++) {
+      if (isWaveform) {
+        barHeight = dataArray[i] * 3;
+      } else {
+        barHeight = dataArray[i] * 2;
+      }
+
+      ctx.fillStyle = props.theme.secondary;
+      ctx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight);
+
+      x += barWidth + 1;
+    }
+  };
+
   const generateSineWave = () => {
     const audioContext = new AudioContext();
     const oscillatorNode = audioContext.createOscillator();
@@ -63,7 +119,7 @@ export default function Home(props) {
     oscillatorNode.start();
   };
 
-  const exampleSetup = () => {
+  const oscillator = () => {
     var stream = new Audio('/audio/file1.mp3');
     stream.play();
 
@@ -78,7 +134,25 @@ export default function Home(props) {
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
-    draw();
+    drawOscillator();
+  };
+
+  const bar = () => {
+    var stream = new Audio('/audio/file1.mp3');
+    stream.play();
+
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+
+    var source = audioContext.createMediaElementSource(stream);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    drawBar();
   };
 
   const microphoneSetup = () => {
@@ -108,7 +182,7 @@ export default function Home(props) {
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
-    draw();
+    drawOscillator();
   };
 
   // this doesn't work lol
@@ -155,7 +229,8 @@ export default function Home(props) {
         height={HEIGHT}
       ></StyledCanvas>
       <SettingsWrapper>
-        <StyledButton onClick={exampleSetup}>example file setup</StyledButton>
+        <StyledButton onClick={oscillator}>oscillator</StyledButton>
+        <StyledButton onClick={bar}>bar</StyledButton>
         <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
         {/* <StyledButton onClick={generateSineWave}>sine wave</StyledButton> */}
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
