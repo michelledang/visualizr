@@ -10,11 +10,24 @@ export default function Home(props) {
   const WIDTH = 1000;
   const HEIGHT = 350;
 
+  const FILES = [
+    '/audio/file1.mp3',
+    '/audio/file2.mp3',
+    '/audio/sine440.wav',
+    '/audio/square440.wav',
+    '/audio/sawtooth440.wav',
+  ];
+
   const [isWaveform, setIsWaveform] = useState(true);
+  const [currentFile, setCurrentFile] = useState(FILES[0]);
   const { selectTheme } = props;
 
   const handleVisualizationToggle = (event) => {
     setIsWaveform(event.target.checked);
+  }
+
+  const handleSelectFile = (event) => {
+    setCurrentFile(event.target.value);
   }
 
   const drawOscillator = () => {
@@ -120,7 +133,7 @@ export default function Home(props) {
   };
 
   const oscillator = () => {
-    var stream = new Audio('/audio/file1.mp3');
+    var stream = new Audio(currentFile);
     stream.play();
 
     audioContext = new AudioContext();
@@ -138,7 +151,7 @@ export default function Home(props) {
   };
 
   const bar = () => {
-    var stream = new Audio('/audio/file1.mp3');
+    var stream = new Audio(currentFile);
     stream.play();
 
     audioContext = new AudioContext();
@@ -238,7 +251,15 @@ export default function Home(props) {
           <label>theme: </label>
           <StyledSelect id="themes" name="themes" onChange={selectTheme}>
             {Object.keys(THEMES).map(key => {
-              return <option value={key}>{THEMES[key].name}</option>;
+              return <option key={key} value={key}>{THEMES[key].name}</option>;
+            })}
+          </StyledSelect>
+        </InputWrapper>
+        <InputWrapper>
+          <label>file: </label>
+          <StyledSelect id="files" name="files" onChange={handleSelectFile}>
+            {FILES.map(file => {
+              return <option key={file} value={file}>{file}</option>;
             })}
           </StyledSelect>
         </InputWrapper>
