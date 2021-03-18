@@ -6,7 +6,7 @@ import THEMES from '../data/themes';
 
 export default function Home(props) {
   var audioContext;
-  var analyser, dataArray, canvas, ctx;
+  var stream, analyser, dataArray, canvas, ctx;
   const WIDTH = 1000;
   const HEIGHT = 350;
 
@@ -21,12 +21,18 @@ export default function Home(props) {
   const [isWaveform, setIsWaveform] = useState(true);
   const [currentFile, setCurrentFile] = useState(FILES[0]);
   const { selectTheme } = props;
+  var shouldStop = false;
+
+  const handleStop = () => {
+    shouldStop = !shouldStop;
+  }
 
   const handleVisualizationToggle = (event) => {
     setIsWaveform(event.target.checked);
   }
 
   const handleSelectFile = (event) => {
+    handleStop();
     setCurrentFile(event.target.value);
   }
 
@@ -36,13 +42,13 @@ export default function Home(props) {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform) {
+    if (isWaveform && !shouldStop) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawOscillator);
-      }, 100);
-    } else {
+      }, 50);
+    } else if (!shouldStop) {
       var drawVisual = requestAnimationFrame(drawOscillator);
-    }
+    } 
 
     if (isWaveform) {
       analyser.getByteTimeDomainData(dataArray); //waveform data
@@ -63,10 +69,10 @@ export default function Home(props) {
     for (var i = 0; i < BUFFER_LEN; i++) {
       if (isWaveform) {
         var v = dataArray[i] / 128.0;
-        var y = (v * HEIGHT) / 2;
+        var y = HEIGHT - (v * HEIGHT) / 2;
       } else {
-        var v = dataArray[i] / 400.0;
-        var y = (v * HEIGHT) / 2 + 50.0;
+        var v = dataArray[i] / 200.0
+        var y = HEIGHT - (v * HEIGHT) / 2;
       }
 
       if (i === 0) {
@@ -80,6 +86,11 @@ export default function Home(props) {
 
     ctx.lineTo(WIDTH, HEIGHT / 2);
     ctx.stroke();
+
+    if (shouldStop) {
+      stream.pause();
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
   };
 
   const drawBar = () => {
@@ -88,11 +99,11 @@ export default function Home(props) {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform) {
+    if (isWaveform && !shouldStop) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawBar);
       }, 100);
-    } else {
+    } else if (!shouldStop) {
       var drawVisual = requestAnimationFrame(drawBar);
     }
 
@@ -122,6 +133,11 @@ export default function Home(props) {
 
       x += barWidth + 1;
     }
+
+    if (shouldStop) {
+      stream.pause();
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
   };
 
   const generateSineWave = () => {
@@ -133,25 +149,25 @@ export default function Home(props) {
   };
 
   const oscillator = () => {
-    var stream = new Audio(currentFile);
+    stream = new Audio(currentFile);
     stream.play();
-
+    
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
-
+    
     var source = audioContext.createMediaElementSource(stream);
     source.connect(analyser);
     analyser.connect(audioContext.destination);
-
+    
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
-
+    
     drawOscillator();
   };
 
   const bar = () => {
-    var stream = new Audio(currentFile);
+    stream = new Audio(currentFile);
     stream.play();
 
     audioContext = new AudioContext();
