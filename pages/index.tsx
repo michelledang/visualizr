@@ -21,19 +21,28 @@ export default function Home(props) {
   const [isWaveform, setIsWaveform] = useState(true);
   const [currentFile, setCurrentFile] = useState(FILES[0]);
   const { selectTheme } = props;
-  var shouldStop = false;
-
+  var shouldStopOs = false;
+  var shouldStopBar = false;
+  var canvasTheme = 'default';
+  
   const handleStop = () => {
-    shouldStop = !shouldStop;
+    shouldStopOs = true;
+    shouldStopBar = true;
+  }
+
+  const handleCanvasTheme = (event) => {
+    canvasTheme = event.target.value;
+    handleStop();
   }
 
   const handleVisualizationToggle = (event) => {
     setIsWaveform(event.target.checked);
+    handleStop();
   }
 
   const handleSelectFile = (event) => {
-    handleStop();
     setCurrentFile(event.target.value);
+    handleStop();
   }
 
   const drawOscillator = () => {
@@ -42,11 +51,11 @@ export default function Home(props) {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform && !shouldStop) {
+    if (isWaveform && !shouldStopOs) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawOscillator);
       }, 50);
-    } else if (!shouldStop) {
+    } else if (!shouldStopOs) {
       var drawVisual = requestAnimationFrame(drawOscillator);
     } 
 
@@ -87,7 +96,7 @@ export default function Home(props) {
     ctx.lineTo(WIDTH, HEIGHT / 2);
     ctx.stroke();
 
-    if (shouldStop) {
+    if (shouldStopOs) {
       stream.pause();
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
@@ -99,11 +108,11 @@ export default function Home(props) {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform && !shouldStop) {
+    if (isWaveform && !shouldStopBar) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawBar);
       }, 100);
-    } else if (!shouldStop) {
+    } else if (!shouldStopBar) {
       var drawVisual = requestAnimationFrame(drawBar);
     }
 
@@ -134,7 +143,7 @@ export default function Home(props) {
       x += barWidth + 1;
     }
 
-    if (shouldStop) {
+    if (shouldStopBar) {
       stream.pause();
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
@@ -149,8 +158,20 @@ export default function Home(props) {
   };
 
   const oscillator = () => {
+    if (stream) {
+      handleStop();
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+
     stream = new Audio(currentFile);
-    stream.play();
+    shouldStopOs = false;
+
+    setTimeout(() => {
+      stream.play();
+    }, 100);
     
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
@@ -167,8 +188,20 @@ export default function Home(props) {
   };
 
   const bar = () => {
+    if (stream) {
+      handleStop();
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+
     stream = new Audio(currentFile);
-    stream.play();
+    shouldStopBar = false;
+
+    setTimeout(() => {
+      stream.play();
+    }, 100);
 
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
@@ -185,8 +218,18 @@ export default function Home(props) {
   };
 
   const microphoneSetup = () => {
+    if (stream) {
+      handleStop();
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
+
+    shouldStopOs = false;
 
     navigator.mediaDevices
       .getUserMedia({
@@ -265,7 +308,10 @@ export default function Home(props) {
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
         <InputWrapper>
           <label>theme: </label>
-          <StyledSelect id="themes" name="themes" onChange={selectTheme}>
+          <StyledSelect id="themes" name="themes" onChange={(e) => {
+            handleCanvasTheme(e);
+            selectTheme(e); 
+          }}>
             {Object.keys(THEMES).map(key => {
               return <option key={key} value={key}>{THEMES[key].name}</option>;
             })}
