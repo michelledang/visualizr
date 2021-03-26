@@ -4,6 +4,45 @@ import { AudioContext } from 'standardized-audio-context';
 import { useState } from 'react';
 import THEMES from '../data/themes';
 
+function getAudioFeatures(id, access_token) {
+  return new Promise(async (resolve, reject) => {
+      try {
+          let fetchURL = 'https://api.spotify.com/v1/audio-features/' + id;
+          console.log(fetchURL);
+          let results = await
+          fetch(fetchURL, {
+              headers: {
+                  "Authorization": "Bearer " + access_token
+              }
+          }).then(response => response.json()).then(data => {
+            return data.analysis_url;
+          })
+          return resolve(results)
+      } catch (e) {
+          return reject(e);
+      }
+  })
+}
+
+function getAnalysis(URL, access_token) {
+  return new Promise(async (resolve, reject) => {
+      try {
+          let results = await
+          fetch(URL, {
+              headers: {
+                  "Authorization": "Bearer " + access_token
+              }
+          }).then(response => response.json()).then(data => {
+            console.log(data);
+            return data;
+          })
+          return resolve(results)
+      } catch (e) {
+          return reject(e);
+      }
+  })
+}
+
 export default function Home(props) {
   var audioContext;
   var stream, analyser, dataArray, canvas, ctx;
@@ -258,38 +297,56 @@ export default function Home(props) {
   };
 
   // this doesn't work lol
-  const spotifySetup = () => {
-  //   audioContext = new AudioContext();
-  //   analyser = audioContext.createAnalyser();
+  const spotifySetup = async () => {
+    if (stream) {
+      handleStop();
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
 
-  //   navigator.mediaDevices
-  //     // @ts-ignore
-  //     .getDisplayMedia({
-  //       video: true,
-  //       audio: true,
-  //     })
-  //     .then((stream) => {
-  //       if (stream.getVideoTracks().length > 0) {
-  //         var source = audioContext.createMediaStreamSource(stream);
-  //         source.connect(analyser);
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
 
-  //         document.body.classList.add('ready');
-  //       } else {
-  //         console.log(
-  //           'Failed to get stream. Audio not shared or browser not supported'
-  //         );
-  //       }
-  //     })
-  //     .catch((err) => console.log('Unable to open capture: ', err));
+    shouldStopOs = false;
 
-  //   analyser.fftSize = 2048;
-  //   var bufferLength = analyser.frequencyBinCount;
-  //   dataArray = new Uint8Array(bufferLength);
+    const access_token = 'BQCGs-SXHBdX91DLYkbEW3SIU-0kyvb5LCdiyqBxIqCFhpXNGRsoMfC4MO8a1RaVGSvPgaSfGnddWj5MY0k';
+    const analysisUrl = await getAudioFeatures('2TpxZ7JUBn3uw46aR7qd6V', access_token);
+    const data = await getAnalysis(analysisUrl, access_token);
+    console.log(data);
 
-  //   analyser.getByteTimeDomainData(dataArray);
-  //   console.log(dataArray);
+    var constraints = {
+      video: true,
+      audio: true,
+    };
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then((stream) => {
+        if (stream.getAudioTracks().length > 0) {
+          // var source = audioContext.createMediaStreamSource(stream);
+          var source = audioContext.createMediaElementSource(stream);
+          source.connect(analyser);
 
-  //   draw();
+          document.body.classList.add('ready');
+          // window.stream = stream;
+          // video.srcObject = stream;
+        } else {
+          console.log(
+            'Failed to get stream. Audio not shared or browser not supported'
+          );
+        }
+      })
+      .catch((err) => console.log('Unable to open capture: ', err));
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    analyser.getByteTimeDomainData(dataArray);
+    console.log(dataArray);
+
+    drawOscillator();
   };
 
   return (
@@ -305,7 +362,7 @@ export default function Home(props) {
         <StyledButton onClick={bar}>bar</StyledButton>
         <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
         {/* <StyledButton onClick={generateSineWave}>sine wave</StyledButton> */}
-        {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
+        <StyledButton onClick={spotifySetup}>spotify setup</StyledButton>
         <InputWrapper>
           <label>theme: </label>
           <StyledSelect id="themes" name="themes" onChange={(e) => {
