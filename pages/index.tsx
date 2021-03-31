@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 import { AudioContext } from 'standardized-audio-context';
 // import SpotifyPlayer from 'react-spotify-web-playback';
@@ -19,12 +20,12 @@ export default function Home(props) {
   ];
 
   const [isWaveform, setIsWaveform] = useState(true);
-  const [currentFile, setCurrentFile] = useState(FILES[0]);
   const [selectedFile, setSelectedFile] = useState();
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
   var canvasTheme = 'default';
+  const hiddenFileInput = React.useRef(null);
   
   const handleStop = () => {
     shouldStopOs = true;
@@ -41,13 +42,13 @@ export default function Home(props) {
     handleStop();
   }
 
-  const handleSelectFile = (event) => {
-    setCurrentFile(event.target.value);
-    handleStop();
-  }
-
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
+    handleStop();
+  }
+  
+  const handleClick = (event) => {
+    hiddenFileInput.current.click();
   }
 
   const drawOscillator = () => {
@@ -175,7 +176,7 @@ export default function Home(props) {
       const soundSrc = URL.createObjectURL(selectedFile);
       stream = new Audio(soundSrc);
     } else {
-      stream = new Audio(currentFile);
+      stream = new Audio(FILES[0]);
     }
     shouldStopOs = false;
 
@@ -210,7 +211,7 @@ export default function Home(props) {
       const soundSrc = URL.createObjectURL(selectedFile);
       stream = new Audio(soundSrc);
     } else {
-      stream = new Audio(currentFile);
+      stream = new Audio(FILES[0]);
     }
     shouldStopBar = false;
 
@@ -310,8 +311,17 @@ export default function Home(props) {
   return (
     <Wrapper>
       <Title>visualizer</Title>
+      <StyledLabel>
+        {selectedFile ? 
+          <label>{selectedFile.name}</label> :
+          <label>No file selected</label>
+        }
+      </StyledLabel>
       <InputWrapper>
-        <input type="file" name="file" onChange={handleFileUpload}/>
+        <StyledButton onClick={handleClick}>
+          Upload a file
+        </StyledButton>
+        <input type="file" ref={hiddenFileInput} name="file" onChange={handleFileUpload} style={{display: 'none'}}/>
       </InputWrapper>
       <StyledCanvas
         id="visualization"
@@ -322,7 +332,6 @@ export default function Home(props) {
         <StyledButton onClick={oscillator}>oscillator</StyledButton>
         <StyledButton onClick={bar}>bar</StyledButton>
         <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
-        {/* <StyledButton onClick={generateSineWave}>sine wave</StyledButton> */}
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
         <InputWrapper>
           <label>theme: </label>
@@ -332,14 +341,6 @@ export default function Home(props) {
           }}>
             {Object.keys(THEMES).map(key => {
               return <option key={key} value={key}>{THEMES[key].name}</option>;
-            })}
-          </StyledSelect>
-        </InputWrapper>
-        <InputWrapper>
-          <label>file: </label>
-          <StyledSelect id="files" name="files" onChange={handleSelectFile}>
-            {FILES.map(file => {
-              return <option key={file} value={file}>{file}</option>;
             })}
           </StyledSelect>
         </InputWrapper>
@@ -396,6 +397,15 @@ const InputWrapper = styled.div`
   align-items: center;
   justify-content: center;
   margin: 10px;
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.background};
+`;
+
+const StyledLabel = styled.label`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -10px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.background};
 `;
