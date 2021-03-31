@@ -20,6 +20,7 @@ export default function Home(props) {
 
   const [isWaveform, setIsWaveform] = useState(true);
   const [currentFile, setCurrentFile] = useState(FILES[0]);
+  const [selectedFile, setSelectedFile] = useState();
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
@@ -43,6 +44,10 @@ export default function Home(props) {
   const handleSelectFile = (event) => {
     setCurrentFile(event.target.value);
     handleStop();
+  }
+
+  const handleFileUpload = (event) => {
+    setSelectedFile(event.target.files[0]);
   }
 
   const drawOscillator = () => {
@@ -166,7 +171,12 @@ export default function Home(props) {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
 
-    stream = new Audio(currentFile);
+    if (selectedFile) {
+      const soundSrc = URL.createObjectURL(selectedFile);
+      stream = new Audio(soundSrc);
+    } else {
+      stream = new Audio(currentFile);
+    }
     shouldStopOs = false;
 
     setTimeout(() => {
@@ -196,7 +206,12 @@ export default function Home(props) {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
 
-    stream = new Audio(currentFile);
+    if (selectedFile) {
+      const soundSrc = URL.createObjectURL(selectedFile);
+      stream = new Audio(soundSrc);
+    } else {
+      stream = new Audio(currentFile);
+    }
     shouldStopBar = false;
 
     setTimeout(() => {
@@ -295,6 +310,9 @@ export default function Home(props) {
   return (
     <Wrapper>
       <Title>visualizer</Title>
+      <InputWrapper>
+        <input type="file" name="file" onChange={handleFileUpload}/>
+      </InputWrapper>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
