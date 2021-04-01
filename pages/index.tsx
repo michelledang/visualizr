@@ -20,7 +20,7 @@ export default function Home(props) {
   ];
 
   const [isWaveform, setIsWaveform] = useState(true);
-  const [selectedFile, setSelectedFile] = useState();
+  const [selectedFile, setSelectedFile] = useState({name: ''});
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
@@ -312,10 +312,7 @@ export default function Home(props) {
     <Wrapper>
       <Title>visualizer</Title>
       <StyledLabel>
-        {selectedFile ? 
-          <label>{selectedFile.name}</label> :
-          <label>No file selected</label>
-        }
+          <label>{selectedFile && selectedFile.name !== '' ? selectedFile.name : 'No file selected'}</label>
       </StyledLabel>
       <InputWrapper>
         <StyledButton onClick={handleClick}>
