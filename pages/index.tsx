@@ -4,6 +4,7 @@ import { AudioContext } from 'standardized-audio-context';
 // import SpotifyPlayer from 'react-spotify-web-playback';
 import { useState } from 'react';
 import THEMES from '../data/themes';
+import {useSpring, animated} from 'react-spring';
 
 export default function Home(props) {
   var audioContext;
@@ -308,6 +309,8 @@ export default function Home(props) {
   //   draw();
   };
 
+  const springTestDivProps = useSpring({opacity: 1, from: {opacity: 0}});
+
   return (
     <Wrapper>
       <Title>visualizer</Title>
@@ -320,6 +323,7 @@ export default function Home(props) {
         </StyledButton>
         <input type="file" ref={hiddenFileInput} name="file" onChange={handleFileUpload} style={{display: 'none'}}/>
       </InputWrapper>
+      <AnimatedSpringTestDiv style={springTestDivProps}>I will fade in</AnimatedSpringTestDiv>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
@@ -418,4 +422,9 @@ const StyledSelect = styled.select`
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 8px;
+`;
+
+const AnimatedSpringTestDiv = styled(animated.div)`
+  display: flex;
+  align-self: center;
 `;
