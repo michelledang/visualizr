@@ -1,9 +1,9 @@
-import React from 'react';
-import styled from 'styled-components';
-import { AudioContext } from 'standardized-audio-context';
+import React from "react";
+import styled from "styled-components";
+import { AudioContext } from "standardized-audio-context";
 // import SpotifyPlayer from 'react-spotify-web-playback';
-import { useState } from 'react';
-import THEMES from '../data/themes';
+import { useState } from "react";
+import THEMES from "../data/themes";
 
 export default function Home(props) {
   var audioContext;
@@ -12,64 +12,58 @@ export default function Home(props) {
   const HEIGHT = 350;
 
   const FILES = [
-    '/audio/file1.mp3',
-    '/audio/file2.mp3',
-    '/audio/sine440.wav',
-    '/audio/square440.wav',
-    '/audio/sawtooth440.wav',
+    "/audio/file1.mp3",
+    "/audio/file2.mp3",
+    "/audio/sine440.wav",
+    "/audio/square440.wav",
+    "/audio/sawtooth440.wav",
   ];
 
   const [isWaveform, setIsWaveform] = useState(true);
-  const [selectedFile, setSelectedFile] = useState({name: ''});
+  const [selectedFile, setSelectedFile] = useState({ name: "" });
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
-  var canvasTheme = 'default';
+  var canvasTheme = "default";
   const hiddenFileInput = React.useRef(null);
-  
+
   const handleStop = () => {
     shouldStopOs = true;
     shouldStopBar = true;
-  }
+  };
 
   const handleCanvasTheme = (event) => {
     canvasTheme = event.target.value;
     handleStop();
-  }
+  };
 
   const handleVisualizationToggle = (event) => {
     setIsWaveform(event.target.checked);
     handleStop();
-  }
+  };
 
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
     handleStop();
-  }
-  
+  };
+
   const handleClick = (event) => {
     hiddenFileInput.current.click();
-  }
+  };
 
   const drawOscillator = () => {
-    canvas = document.getElementById('visualization');
-    ctx = canvas.getContext('2d');
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform && !shouldStopOs) {
+    if (!shouldStopOs) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawOscillator);
       }, 50);
-    } else if (!shouldStopOs) {
-      var drawVisual = requestAnimationFrame(drawOscillator);
-    } 
-
-    if (isWaveform) {
-      analyser.getByteTimeDomainData(dataArray); //waveform data
-    } else {
-      analyser.getByteFrequencyData(dataArray); //frequency data
     }
+
+    analyser.getByteTimeDomainData(dataArray); //waveform data
 
     ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -86,7 +80,7 @@ export default function Home(props) {
         var v = dataArray[i] / 128.0;
         var y = HEIGHT - (v * HEIGHT) / 2;
       } else {
-        var v = dataArray[i] / 200.0
+        var v = dataArray[i] / 200.0;
         var y = HEIGHT - (v * HEIGHT) / 2;
       }
 
@@ -109,42 +103,30 @@ export default function Home(props) {
   };
 
   const drawBar = () => {
-    canvas = document.getElementById('visualization');
-    ctx = canvas.getContext('2d');
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
-    if (isWaveform && !shouldStopBar) {
-      setTimeout(() => {
-        var drawVisual = requestAnimationFrame(drawBar);
-      }, 100);
-    } else if (!shouldStopBar) {
+    if (!shouldStopBar) {
       var drawVisual = requestAnimationFrame(drawBar);
     }
 
-    if (isWaveform) {
-      analyser.getByteTimeDomainData(dataArray); //waveform data
-    } else {
-      analyser.getByteFrequencyData(dataArray); //frequency data
-    }
+    analyser.getByteFrequencyData(dataArray); //frequency data
 
     ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    
+
     const BUFFER_LEN = dataArray.length;
     var barWidth = (WIDTH / BUFFER_LEN) * 20;
     var barHeight;
     var x = 0;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      if (isWaveform) {
-        barHeight = dataArray[i] * 3;
-      } else {
-        barHeight = dataArray[i] * 2;
-      }
+      barHeight = dataArray[i] * 2;
 
       ctx.fillStyle = props.theme.secondary;
-      ctx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight);
+      ctx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight);
 
       x += barWidth + 1;
     }
@@ -172,7 +154,7 @@ export default function Home(props) {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
 
-    if (selectedFile) {
+    if (selectedFile.name.length) {
       const soundSrc = URL.createObjectURL(selectedFile);
       stream = new Audio(soundSrc);
     } else {
@@ -183,18 +165,18 @@ export default function Home(props) {
     setTimeout(() => {
       stream.play();
     }, 100);
-    
+
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
-    
+
     var source = audioContext.createMediaElementSource(stream);
     source.connect(analyser);
     analyser.connect(audioContext.destination);
-    
+
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
-    
+
     drawOscillator();
   };
 
@@ -207,7 +189,7 @@ export default function Home(props) {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
 
-    if (selectedFile) {
+    if (selectedFile.name.length) {
       const soundSrc = URL.createObjectURL(selectedFile);
       stream = new Audio(soundSrc);
     } else {
@@ -257,14 +239,14 @@ export default function Home(props) {
           var source = audioContext.createMediaStreamSource(stream);
           source.connect(analyser);
 
-          document.body.classList.add('ready');
+          document.body.classList.add("ready");
         } else {
           console.log(
-            'Failed to get stream. Audio not shared or browser not supported'
+            "Failed to get stream. Audio not shared or browser not supported"
           );
         }
       })
-      .catch((err) => console.log('Unable to open capture: ', err));
+      .catch((err) => console.log("Unable to open capture: ", err));
 
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
@@ -275,50 +257,53 @@ export default function Home(props) {
 
   // this doesn't work lol
   const spotifySetup = () => {
-  //   audioContext = new AudioContext();
-  //   analyser = audioContext.createAnalyser();
-
-  //   navigator.mediaDevices
-  //     // @ts-ignore
-  //     .getDisplayMedia({
-  //       video: true,
-  //       audio: true,
-  //     })
-  //     .then((stream) => {
-  //       if (stream.getVideoTracks().length > 0) {
-  //         var source = audioContext.createMediaStreamSource(stream);
-  //         source.connect(analyser);
-
-  //         document.body.classList.add('ready');
-  //       } else {
-  //         console.log(
-  //           'Failed to get stream. Audio not shared or browser not supported'
-  //         );
-  //       }
-  //     })
-  //     .catch((err) => console.log('Unable to open capture: ', err));
-
-  //   analyser.fftSize = 2048;
-  //   var bufferLength = analyser.frequencyBinCount;
-  //   dataArray = new Uint8Array(bufferLength);
-
-  //   analyser.getByteTimeDomainData(dataArray);
-  //   console.log(dataArray);
-
-  //   draw();
+    //   audioContext = new AudioContext();
+    //   analyser = audioContext.createAnalyser();
+    //   navigator.mediaDevices
+    //     // @ts-ignore
+    //     .getDisplayMedia({
+    //       video: true,
+    //       audio: true,
+    //     })
+    //     .then((stream) => {
+    //       if (stream.getVideoTracks().length > 0) {
+    //         var source = audioContext.createMediaStreamSource(stream);
+    //         source.connect(analyser);
+    //         document.body.classList.add('ready');
+    //       } else {
+    //         console.log(
+    //           'Failed to get stream. Audio not shared or browser not supported'
+    //         );
+    //       }
+    //     })
+    //     .catch((err) => console.log('Unable to open capture: ', err));
+    //   analyser.fftSize = 2048;
+    //   var bufferLength = analyser.frequencyBinCount;
+    //   dataArray = new Uint8Array(bufferLength);
+    //   analyser.getByteTimeDomainData(dataArray);
+    //   console.log(dataArray);
+    //   draw();
   };
 
   return (
     <Wrapper>
       <Title>visualizer</Title>
       <StyledLabel>
-          <label>{selectedFile && selectedFile.name !== '' ? selectedFile.name : 'No file selected'}</label>
+        <label>
+          {selectedFile && selectedFile.name !== ""
+            ? selectedFile.name
+            : "No file selected"}
+        </label>
       </StyledLabel>
       <InputWrapper>
-        <StyledButton onClick={handleClick}>
-          Upload a file
-        </StyledButton>
-        <input type="file" ref={hiddenFileInput} name="file" onChange={handleFileUpload} style={{display: 'none'}}/>
+        <StyledButton onClick={handleClick}>Upload a file</StyledButton>
+        <input
+          type="file"
+          ref={hiddenFileInput}
+          name="file"
+          onChange={handleFileUpload}
+          style={{ display: "none" }}
+        />
       </InputWrapper>
       <StyledCanvas
         id="visualization"
@@ -332,29 +317,29 @@ export default function Home(props) {
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
         <InputWrapper>
           <label>theme: </label>
-          <StyledSelect id="themes" name="themes" onChange={(e) => {
-            handleCanvasTheme(e);
-            selectTheme(e); 
-          }}>
-            {Object.keys(THEMES).map(key => {
-              return <option key={key} value={key}>{THEMES[key].name}</option>;
+          <StyledSelect
+            id="themes"
+            name="themes"
+            onChange={(e) => {
+              handleCanvasTheme(e);
+              selectTheme(e);
+            }}
+          >
+            {Object.keys(THEMES).map((key) => {
+              return (
+                <option key={key} value={key}>
+                  {THEMES[key].name}
+                </option>
+              );
             })}
           </StyledSelect>
-        </InputWrapper>
-        <InputWrapper>
-          <label>isWaveform: </label>
-          <input
-            name="visualization-type"
-            type="checkbox"
-            checked={isWaveform}
-            onChange={handleVisualizationToggle} />
         </InputWrapper>
         {/* <SpotifyPlayer
           token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
           uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
         /> */}
       </SettingsWrapper>
-      </Wrapper>
+    </Wrapper>
   );
 }
 
