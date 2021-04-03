@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { AudioContext } from "standardized-audio-context";
-// import SpotifyPlayer from 'react-spotify-web-playback';
 import { useState, useEffect } from "react";
 import THEMES from "../data/themes";
 
@@ -173,136 +172,6 @@ export default function Home(props) {
     }
   };
 
-  const generateSineWave = () => {
-    const audioContext = new AudioContext();
-    const oscillatorNode = audioContext.createOscillator();
-
-    oscillatorNode.connect(audioContext.destination);
-    oscillatorNode.start();
-  };
-
-  const oscillator = () => {
-    // if (stream) {
-    //   handleStop();
-    //   stream.pause();
-    // }
-    // if (ctx) {
-    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    // }
-    // if (selectedFile.name.length) {
-    //   const soundSrc = URL.createObjectURL(selectedFile);
-    //   stream = new Audio(soundSrc);
-    // } else {
-    //   stream = new Audio(FILES[0]);
-    // }
-    // shouldStopOs = false;
-    // setTimeout(() => {
-    //   stream.play();
-    // }, 100);
-    // audioContext = new AudioContext();
-    // analyser = audioContext.createAnalyser();
-    // var source = audioContext.createMediaElementSource(stream);
-    // source.connect(analyser);
-    // analyser.connect(audioContext.destination);
-    // analyser.fftSize = 2048;
-    // var bufferLength = analyser.frequencyBinCount;
-    // dataArray = new Uint8Array(bufferLength);
-    // drawOscillator();
-  };
-
-  const bar = () => {
-    // if (stream) {
-    //   handleStop();
-    //   stream.pause();
-    // }
-    // if (ctx) {
-    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    // }
-    // if (selectedFile.name.length) {
-    //   const soundSrc = URL.createObjectURL(selectedFile);
-    //   stream = new Audio(soundSrc);
-    // } else {
-    //   stream = new Audio(FILES[0]);
-    // }
-    // shouldStopBar = false;
-    // setTimeout(() => {
-    //   stream.play();
-    // }, 100);
-    // audioContext = new AudioContext();
-    // analyser = audioContext.createAnalyser();
-    // var source = audioContext.createMediaElementSource(stream);
-    // source.connect(analyser);
-    // analyser.connect(audioContext.destination);
-    // analyser.fftSize = 2048;
-    // var bufferLength = analyser.frequencyBinCount;
-    // dataArray = new Uint8Array(bufferLength);
-    // drawBar();
-  };
-
-  const microphoneSetup = () => {
-    // if (stream) {
-    //   handleStop();
-    //   stream.pause();
-    // }
-    // if (ctx) {
-    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    // }
-    // audioContext = new AudioContext();
-    // analyser = audioContext.createAnalyser();
-    // shouldStopOs = false;
-    // navigator.mediaDevices
-    //   .getUserMedia({
-    //     video: false,
-    //     audio: true,
-    //   })
-    //   .then((stream) => {
-    //     if (stream.getAudioTracks().length > 0) {
-    //       var source = audioContext.createMediaStreamSource(stream);
-    //       source.connect(analyser);
-    //       document.body.classList.add("ready");
-    //     } else {
-    //       console.log(
-    //         "Failed to get stream. Audio not shared or browser not supported"
-    //       );
-    //     }
-    //   })
-    //   .catch((err) => console.log("Unable to open capture: ", err));
-    // analyser.fftSize = 2048;
-    // var bufferLength = analyser.frequencyBinCount;
-    // dataArray = new Uint8Array(bufferLength);
-    // drawOscillator();
-  };
-
-  // this doesn't work lol
-  const spotifySetup = () => {
-    //   audioContext = new AudioContext();
-    //   analyser = audioContext.createAnalyser();
-    //   navigator.mediaDevices
-    //     // @ts-ignore
-    //     .getDisplayMedia({
-    //       video: true,
-    //       audio: true,
-    //     })
-    //     .then((stream) => {
-    //       if (stream.getVideoTracks().length > 0) {
-    //         var source = audioContext.createMediaStreamSource(stream);
-    //         source.connect(analyser);
-    //         document.body.classList.add('ready');
-    //       } else {
-    //         console.log(
-    //           'Failed to get stream. Audio not shared or browser not supported'
-    //         );
-    //       }
-    //     })
-    //     .catch((err) => console.log('Unable to open capture: ', err));
-    //   analyser.fftSize = 2048;
-    //   var bufferLength = analyser.frequencyBinCount;
-    //   dataArray = new Uint8Array(bufferLength);
-    //   analyser.getByteTimeDomainData(dataArray);
-    //   console.log(dataArray);
-    //   draw();
-  };
-
   const start = () => {
     console.log(visualizationType, visualizationSource);
     console.log(stream, ctx);
@@ -457,10 +326,6 @@ export default function Home(props) {
             })}
           </StyledSelect>
         </InputWrapper>
-        {/* <SpotifyPlayer
-          token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
-          uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
-        /> */}
         <StyledButton
           onClick={() => {
             handleStop();
