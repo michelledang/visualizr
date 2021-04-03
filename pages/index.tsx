@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { AudioContext } from "standardized-audio-context";
 // import SpotifyPlayer from 'react-spotify-web-playback';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import THEMES from "../data/themes";
 
 export default function Home(props) {
@@ -19,32 +19,66 @@ export default function Home(props) {
     "/audio/sawtooth440.wav",
   ];
 
+  const VISUALIZATION_TYPES = {
+    OSCILLATOR: "oscillator",
+    BAR: "bar",
+  };
+
+  const VISUALIZATION_SOURCES = {
+    FILE: "file",
+    MICROPHONE: "microphone",
+  };
+
   const [isWaveform, setIsWaveform] = useState(true);
   const [selectedFile, setSelectedFile] = useState({ name: "" });
+  const [visualizationType, setVisualizationType] = useState(
+    VISUALIZATION_TYPES.OSCILLATOR
+  );
+  const [visualizationSource, setVisualizationSource] = useState(
+    VISUALIZATION_SOURCES.FILE
+  );
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
+  const [reset, setReset] = useState(false);
   var canvasTheme = "default";
   const hiddenFileInput = React.useRef(null);
 
+  // useEffect(() => {
+  //   console.log("use effect reset:", reset);
+  //   if (reset) {
+  //     stream?.pause();
+  //     ctx?.clearRect(0, 0, WIDTH, HEIGHT);
+  //     setReset(false);
+  //   }
+  // }, [reset]);
+
   const handleStop = () => {
+    selectTheme(canvasTheme);
+    setReset(true);
+    console.log("handle stop reset:", reset);
     shouldStopOs = true;
     shouldStopBar = true;
   };
 
   const handleCanvasTheme = (event) => {
     canvasTheme = event.target.value;
-    handleStop();
+    // handleStop();
   };
 
-  const handleVisualizationToggle = (event) => {
-    setIsWaveform(event.target.checked);
-    handleStop();
+  const handleVisualizationType = (event) => {
+    setVisualizationType(event.target.value);
+    // handleStop();
+  };
+
+  const handleVisualizationSource = (event) => {
+    setVisualizationSource(event.target.value);
+    // handleStop();
   };
 
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
-    handleStop();
+    // handleStop();
   };
 
   const handleClick = (event) => {
@@ -96,7 +130,8 @@ export default function Home(props) {
     ctx.lineTo(WIDTH, HEIGHT / 2);
     ctx.stroke();
 
-    if (shouldStopOs) {
+    if (shouldStopOs || reset) {
+      console.log("oscillator pause");
       stream.pause();
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
@@ -131,7 +166,8 @@ export default function Home(props) {
       x += barWidth + 1;
     }
 
-    if (shouldStopBar) {
+    if (shouldStopBar || reset) {
+      console.log("bar pause");
       stream.pause();
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
@@ -146,113 +182,95 @@ export default function Home(props) {
   };
 
   const oscillator = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    if (selectedFile.name.length) {
-      const soundSrc = URL.createObjectURL(selectedFile);
-      stream = new Audio(soundSrc);
-    } else {
-      stream = new Audio(FILES[0]);
-    }
-    shouldStopOs = false;
-
-    setTimeout(() => {
-      stream.play();
-    }, 100);
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    var source = audioContext.createMediaElementSource(stream);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawOscillator();
+    // if (stream) {
+    //   handleStop();
+    //   stream.pause();
+    // }
+    // if (ctx) {
+    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    // }
+    // if (selectedFile.name.length) {
+    //   const soundSrc = URL.createObjectURL(selectedFile);
+    //   stream = new Audio(soundSrc);
+    // } else {
+    //   stream = new Audio(FILES[0]);
+    // }
+    // shouldStopOs = false;
+    // setTimeout(() => {
+    //   stream.play();
+    // }, 100);
+    // audioContext = new AudioContext();
+    // analyser = audioContext.createAnalyser();
+    // var source = audioContext.createMediaElementSource(stream);
+    // source.connect(analyser);
+    // analyser.connect(audioContext.destination);
+    // analyser.fftSize = 2048;
+    // var bufferLength = analyser.frequencyBinCount;
+    // dataArray = new Uint8Array(bufferLength);
+    // drawOscillator();
   };
 
   const bar = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    if (selectedFile.name.length) {
-      const soundSrc = URL.createObjectURL(selectedFile);
-      stream = new Audio(soundSrc);
-    } else {
-      stream = new Audio(FILES[0]);
-    }
-    shouldStopBar = false;
-
-    setTimeout(() => {
-      stream.play();
-    }, 100);
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    var source = audioContext.createMediaElementSource(stream);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawBar();
+    // if (stream) {
+    //   handleStop();
+    //   stream.pause();
+    // }
+    // if (ctx) {
+    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    // }
+    // if (selectedFile.name.length) {
+    //   const soundSrc = URL.createObjectURL(selectedFile);
+    //   stream = new Audio(soundSrc);
+    // } else {
+    //   stream = new Audio(FILES[0]);
+    // }
+    // shouldStopBar = false;
+    // setTimeout(() => {
+    //   stream.play();
+    // }, 100);
+    // audioContext = new AudioContext();
+    // analyser = audioContext.createAnalyser();
+    // var source = audioContext.createMediaElementSource(stream);
+    // source.connect(analyser);
+    // analyser.connect(audioContext.destination);
+    // analyser.fftSize = 2048;
+    // var bufferLength = analyser.frequencyBinCount;
+    // dataArray = new Uint8Array(bufferLength);
+    // drawBar();
   };
 
   const microphoneSetup = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    shouldStopOs = false;
-
-    navigator.mediaDevices
-      .getUserMedia({
-        video: false,
-        audio: true,
-      })
-      .then((stream) => {
-        if (stream.getAudioTracks().length > 0) {
-          var source = audioContext.createMediaStreamSource(stream);
-          source.connect(analyser);
-
-          document.body.classList.add("ready");
-        } else {
-          console.log(
-            "Failed to get stream. Audio not shared or browser not supported"
-          );
-        }
-      })
-      .catch((err) => console.log("Unable to open capture: ", err));
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawOscillator();
+    // if (stream) {
+    //   handleStop();
+    //   stream.pause();
+    // }
+    // if (ctx) {
+    //   ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    // }
+    // audioContext = new AudioContext();
+    // analyser = audioContext.createAnalyser();
+    // shouldStopOs = false;
+    // navigator.mediaDevices
+    //   .getUserMedia({
+    //     video: false,
+    //     audio: true,
+    //   })
+    //   .then((stream) => {
+    //     if (stream.getAudioTracks().length > 0) {
+    //       var source = audioContext.createMediaStreamSource(stream);
+    //       source.connect(analyser);
+    //       document.body.classList.add("ready");
+    //     } else {
+    //       console.log(
+    //         "Failed to get stream. Audio not shared or browser not supported"
+    //       );
+    //     }
+    //   })
+    //   .catch((err) => console.log("Unable to open capture: ", err));
+    // analyser.fftSize = 2048;
+    // var bufferLength = analyser.frequencyBinCount;
+    // dataArray = new Uint8Array(bufferLength);
+    // drawOscillator();
   };
 
   // this doesn't work lol
@@ -285,36 +303,142 @@ export default function Home(props) {
     //   draw();
   };
 
+  const start = () => {
+    console.log(visualizationType, visualizationSource);
+    console.log(stream, ctx);
+    if (stream) {
+      handleStop();
+      console.log("handleStop()");
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+      console.log("clearRect()");
+    }
+
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+
+    if (visualizationType === VISUALIZATION_TYPES.BAR) {
+      shouldStopBar = false;
+      setReset(false);
+    } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
+      shouldStopOs = false;
+      setReset(false);
+    }
+
+    console.log(shouldStopOs, shouldStopBar, reset);
+
+    setTimeout(() => {
+      stream?.play();
+    }, 100);
+
+    if (visualizationSource === VISUALIZATION_SOURCES.MICROPHONE) {
+      navigator.mediaDevices
+        .getUserMedia({
+          video: false,
+          audio: true,
+        })
+        .then((stream) => {
+          if (stream.getAudioTracks().length > 0) {
+            var source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+
+            document.body.classList.add("ready");
+          } else {
+            console.log(
+              "Failed to get stream. Audio not shared or browser not supported"
+            );
+          }
+        })
+        .catch((err) => console.log("Unable to open capture: ", err));
+    } else if (visualizationSource === VISUALIZATION_SOURCES.FILE) {
+      const soundSrc = selectedFile.name.length
+        ? URL.createObjectURL(selectedFile)
+        : FILES[0];
+      stream = new Audio(soundSrc);
+      var source = audioContext.createMediaElementSource(stream);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+    }
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    if (visualizationType === VISUALIZATION_TYPES.BAR) {
+      drawBar();
+    } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
+      drawOscillator();
+    }
+  };
+
   return (
     <Wrapper>
       <Title>visualizer</Title>
-      <StyledLabel>
-        <label>
-          {selectedFile && selectedFile.name !== ""
-            ? selectedFile.name
-            : "No file selected"}
-        </label>
-      </StyledLabel>
-      <InputWrapper>
-        <StyledButton onClick={handleClick}>Upload a file</StyledButton>
-        <input
-          type="file"
-          ref={hiddenFileInput}
-          name="file"
-          onChange={handleFileUpload}
-          style={{ display: "none" }}
-        />
-      </InputWrapper>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
         height={HEIGHT}
       ></StyledCanvas>
       <SettingsWrapper>
-        <StyledButton onClick={oscillator}>oscillator</StyledButton>
-        <StyledButton onClick={bar}>bar</StyledButton>
-        <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
-        {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
+        <StyledLabel>
+          <label>
+            {selectedFile && selectedFile.name !== ""
+              ? selectedFile.name
+              : "No file selected"}
+          </label>
+        </StyledLabel>
+        <InputWrapper>
+          <StyledSecondaryButton onClick={handleClick}>
+            Upload a file
+          </StyledSecondaryButton>
+          <input
+            type="file"
+            ref={hiddenFileInput}
+            name="file"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+          />
+        </InputWrapper>
+        {/* <StyledSecondaryButton onClick={microphoneSetup}>microphone setup</StyledSecondaryButton> */}
+        {/* <StyledSecondaryButton onClick={spotifySetup}>spotify setup</StyledSecondaryButton> */}
+        <InputWrapper>
+          <label>source: </label>
+          <StyledSelect
+            id="visualization-source"
+            name="visualization-source"
+            onChange={(e) => {
+              handleVisualizationSource(e);
+            }}
+          >
+            {Object.keys(VISUALIZATION_SOURCES).map((key) => {
+              return (
+                <option key={key} value={VISUALIZATION_SOURCES[key]}>
+                  {VISUALIZATION_SOURCES[key]}
+                </option>
+              );
+            })}
+          </StyledSelect>
+        </InputWrapper>
+        <InputWrapper>
+          <label>type: </label>
+          <StyledSelect
+            id="visualization-type"
+            name="visualization-type"
+            onChange={(e) => {
+              handleVisualizationType(e);
+            }}
+          >
+            {Object.keys(VISUALIZATION_TYPES).map((key) => {
+              return (
+                <option key={key} value={VISUALIZATION_TYPES[key]}>
+                  {VISUALIZATION_TYPES[key]}
+                </option>
+              );
+            })}
+          </StyledSelect>
+        </InputWrapper>
         <InputWrapper>
           <label>theme: </label>
           <StyledSelect
@@ -322,7 +446,6 @@ export default function Home(props) {
             name="themes"
             onChange={(e) => {
               handleCanvasTheme(e);
-              selectTheme(e);
             }}
           >
             {Object.keys(THEMES).map((key) => {
@@ -338,6 +461,15 @@ export default function Home(props) {
           token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
           uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
         /> */}
+        <StyledButton
+          onClick={() => {
+            handleStop();
+            console.log("start clicked");
+            start();
+          }}
+        >
+          start
+        </StyledButton>
       </SettingsWrapper>
     </Wrapper>
   );
@@ -362,13 +494,25 @@ const Title = styled.h1`
   color: ${({ theme }) => theme.primary};
 `;
 
-const StyledButton = styled.button`
+const StyledSecondaryButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
   margin: 10px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.secondary};
+  border-radius: 12px;
+  padding: 8px 20px;
+`;
+
+const StyledButton = styled.button`
+  display: flex;
+  width: fit-content;
+  align-self: center;
+  margin: 10px;
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.secondary};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 8px 20px;
