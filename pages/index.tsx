@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { AudioContext } from "standardized-audio-context";
-// import SpotifyPlayer from 'react-spotify-web-playback';
 import { useState } from "react";
 import THEMES from "../data/themes";
 
@@ -19,26 +18,22 @@ export default function Home(props) {
     "/audio/sawtooth440.wav",
   ];
 
-  const [isWaveform, setIsWaveform] = useState(true);
   const [selectedFile, setSelectedFile] = useState({ name: "" });
   const { selectTheme } = props;
   var shouldStopOs = false;
   var shouldStopBar = false;
+  var shouldStopCircle = false;
   var canvasTheme = "default";
   const hiddenFileInput = React.useRef(null);
 
   const handleStop = () => {
     shouldStopOs = true;
     shouldStopBar = true;
+    shouldStopCircle = true;
   };
 
   const handleCanvasTheme = (event) => {
     canvasTheme = event.target.value;
-    handleStop();
-  };
-
-  const handleVisualizationToggle = (event) => {
-    setIsWaveform(event.target.checked);
     handleStop();
   };
 
@@ -76,13 +71,8 @@ export default function Home(props) {
     var x = 0;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      if (isWaveform) {
-        var v = dataArray[i] / 128.0;
-        var y = HEIGHT - (v * HEIGHT) / 2;
-      } else {
-        var v = dataArray[i] / 200.0;
-        var y = HEIGHT - (v * HEIGHT) / 2;
-      }
+      var v = dataArray[i] / 128.0;
+      var y = HEIGHT - (v * HEIGHT) / 2;
 
       if (i === 0) {
         ctx.moveTo(x, y);
@@ -132,6 +122,42 @@ export default function Home(props) {
     }
 
     if (shouldStopBar) {
+      stream.pause();
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+  };
+
+  const drawCircle = () => {
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // use a delay for waveform only
+    if (!shouldStopCircle) {
+      setTimeout(() => {
+        var drawVisual = requestAnimationFrame(drawCircle);
+      }, 50);
+    }
+
+    analyser.getByteTimeDomainData(dataArray); //waveform data
+
+    ctx.fillStyle = props.theme.background;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.strokeStyle = props.theme.secondary;
+    ctx.beginPath();
+
+    const BUFFER_LEN = dataArray.length;
+    var x = 500;
+    var y = 150;
+
+    for (var i = 0; i < BUFFER_LEN; i++) {
+      var radius = dataArray[i] / 5.0 + 50;
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    }
+
+    ctx.stroke();
+
+    if (shouldStopCircle) {
       stream.pause();
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
@@ -215,6 +241,41 @@ export default function Home(props) {
     drawBar();
   };
 
+  const circle = () => {
+    if (stream) {
+      handleStop();
+      stream.pause();
+    }
+    if (ctx) {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+
+    if (selectedFile.name.length) {
+      const soundSrc = URL.createObjectURL(selectedFile);
+      stream = new Audio(soundSrc);
+    } else {
+      stream = new Audio(FILES[0]);
+    }
+    shouldStopCircle = false;
+
+    setTimeout(() => {
+      stream.play();
+    }, 100);
+
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+
+    var source = audioContext.createMediaElementSource(stream);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    drawCircle();
+  };
+
   const microphoneSetup = () => {
     if (stream) {
       handleStop();
@@ -255,36 +316,6 @@ export default function Home(props) {
     drawOscillator();
   };
 
-  // this doesn't work lol
-  const spotifySetup = () => {
-    //   audioContext = new AudioContext();
-    //   analyser = audioContext.createAnalyser();
-    //   navigator.mediaDevices
-    //     // @ts-ignore
-    //     .getDisplayMedia({
-    //       video: true,
-    //       audio: true,
-    //     })
-    //     .then((stream) => {
-    //       if (stream.getVideoTracks().length > 0) {
-    //         var source = audioContext.createMediaStreamSource(stream);
-    //         source.connect(analyser);
-    //         document.body.classList.add('ready');
-    //       } else {
-    //         console.log(
-    //           'Failed to get stream. Audio not shared or browser not supported'
-    //         );
-    //       }
-    //     })
-    //     .catch((err) => console.log('Unable to open capture: ', err));
-    //   analyser.fftSize = 2048;
-    //   var bufferLength = analyser.frequencyBinCount;
-    //   dataArray = new Uint8Array(bufferLength);
-    //   analyser.getByteTimeDomainData(dataArray);
-    //   console.log(dataArray);
-    //   draw();
-  };
-
   return (
     <Wrapper>
       <Title>visualizer</Title>
@@ -292,11 +323,11 @@ export default function Home(props) {
         <label>
           {selectedFile && selectedFile.name !== ""
             ? selectedFile.name
-            : "No file selected"}
+            : "no file selected"}
         </label>
       </StyledLabel>
       <InputWrapper>
-        <StyledButton onClick={handleClick}>Upload a file</StyledButton>
+        <StyledButton onClick={handleClick}>upload</StyledButton>
         <input
           type="file"
           ref={hiddenFileInput}
@@ -313,6 +344,7 @@ export default function Home(props) {
       <SettingsWrapper>
         <StyledButton onClick={oscillator}>oscillator</StyledButton>
         <StyledButton onClick={bar}>bar</StyledButton>
+        <StyledButton onClick={circle}>circle</StyledButton>
         <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
         {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
         <InputWrapper>
@@ -334,10 +366,6 @@ export default function Home(props) {
             })}
           </StyledSelect>
         </InputWrapper>
-        {/* <SpotifyPlayer
-          token="BQD33hGqZk6PhHt-SRuIRPEcX-WXCBD8L0Iw9v5XI6HixmyF2S4hutEwfEQ_kjCcE7XI1RXi0CJe57yvHgyDq84jbjBkVvAVrYMORoVuuJ0yyvaITDjOyDpyU7EVWyK_Eww0CvsglaV9cTWfj5MDJed5WRbVtUvMCIosmc6nZYY_cjew3VHJc_3QeMpIzD5UQw"
-          uris={['spotify:track:3X4dCNeVxPCqiRfyB5hJeH']}
-        /> */}
       </SettingsWrapper>
     </Wrapper>
   );
