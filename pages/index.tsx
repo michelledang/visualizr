@@ -18,13 +18,31 @@ export default function Home(props) {
     "/audio/sawtooth440.wav",
   ];
 
+  const VISUALIZATION_TYPES = {
+    OSCILLATOR: "oscillator",
+    BAR: "bar",
+    CIRCLE: "circle",
+  };
+
+  const VISUALIZATION_SOURCES = {
+    FILE: "file",
+    MICROPHONE: "microphone",
+  };
+
   const [selectedFile, setSelectedFile] = useState({ name: "" });
+  const [visualizationType, setVisualizationType] = useState(
+    VISUALIZATION_TYPES.OSCILLATOR
+  );
+  const [visualizationSource, setVisualizationSource] = useState(
+    VISUALIZATION_SOURCES.FILE
+  );
   const { selectTheme } = props;
+  var canvasTheme = "default";
+  const hiddenFileInput = React.useRef(null);
+
   var shouldStopOs = false;
   var shouldStopBar = false;
   var shouldStopCircle = false;
-  var canvasTheme = "default";
-  const hiddenFileInput = React.useRef(null);
 
   const handleStop = () => {
     shouldStopOs = true;
@@ -34,6 +52,17 @@ export default function Home(props) {
 
   const handleCanvasTheme = (event) => {
     canvasTheme = event.target.value;
+    selectTheme(canvasTheme);
+    handleStop();
+  };
+
+  const handleVisualizationType = (event) => {
+    setVisualizationType(event.target.value);
+    handleStop();
+  };
+
+  const handleVisualizationSource = (event) => {
+    setVisualizationSource(event.target.value);
     handleStop();
   };
 
@@ -41,8 +70,8 @@ export default function Home(props) {
     setSelectedFile(event.target.files[0]);
     handleStop();
   };
-
-  const handleClick = (event) => {
+  
+  const handleClick = () => {
     hiddenFileInput.current.click();
   };
 
@@ -87,7 +116,9 @@ export default function Home(props) {
     ctx.stroke();
 
     if (shouldStopOs) {
-      stream.pause();
+      if (stream) {
+        stream.pause();
+      }
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
   };
@@ -122,7 +153,9 @@ export default function Home(props) {
     }
 
     if (shouldStopBar) {
-      stream.pause();
+      if (stream) {
+        stream.pause();
+      }
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
   };
@@ -158,125 +191,14 @@ export default function Home(props) {
     ctx.stroke();
 
     if (shouldStopCircle) {
-      stream.pause();
+      if (stream) {
+        stream.pause();
+      }
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
   };
 
-  const generateSineWave = () => {
-    const audioContext = new AudioContext();
-    const oscillatorNode = audioContext.createOscillator();
-
-    oscillatorNode.connect(audioContext.destination);
-    oscillatorNode.start();
-  };
-
-  const oscillator = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    if (selectedFile.name.length) {
-      const soundSrc = URL.createObjectURL(selectedFile);
-      stream = new Audio(soundSrc);
-    } else {
-      stream = new Audio(FILES[0]);
-    }
-    shouldStopOs = false;
-
-    setTimeout(() => {
-      stream.play();
-    }, 100);
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    var source = audioContext.createMediaElementSource(stream);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawOscillator();
-  };
-
-  const bar = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    if (selectedFile.name.length) {
-      const soundSrc = URL.createObjectURL(selectedFile);
-      stream = new Audio(soundSrc);
-    } else {
-      stream = new Audio(FILES[0]);
-    }
-    shouldStopBar = false;
-
-    setTimeout(() => {
-      stream.play();
-    }, 100);
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    var source = audioContext.createMediaElementSource(stream);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawBar();
-  };
-
-  const circle = () => {
-    if (stream) {
-      handleStop();
-      stream.pause();
-    }
-    if (ctx) {
-      ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    }
-
-    if (selectedFile.name.length) {
-      const soundSrc = URL.createObjectURL(selectedFile);
-      stream = new Audio(soundSrc);
-    } else {
-      stream = new Audio(FILES[0]);
-    }
-    shouldStopCircle = false;
-
-    setTimeout(() => {
-      stream.play();
-    }, 100);
-
-    audioContext = new AudioContext();
-    analyser = audioContext.createAnalyser();
-
-    var source = audioContext.createMediaElementSource(stream);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyser.fftSize = 2048;
-    var bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
-    drawCircle();
-  };
-
-  const microphoneSetup = () => {
+  const start = () => {
     if (stream) {
       handleStop();
       stream.pause();
@@ -288,9 +210,8 @@ export default function Home(props) {
     audioContext = new AudioContext();
     analyser = audioContext.createAnalyser();
 
-    shouldStopOs = false;
-
-    navigator.mediaDevices
+    if (visualizationSource === VISUALIZATION_SOURCES.MICROPHONE) {
+      navigator.mediaDevices
       .getUserMedia({
         video: false,
         audio: true,
@@ -299,54 +220,119 @@ export default function Home(props) {
         if (stream.getAudioTracks().length > 0) {
           var source = audioContext.createMediaStreamSource(stream);
           source.connect(analyser);
-
+          
           document.body.classList.add("ready");
         } else {
           console.log(
-            "Failed to get stream. Audio not shared or browser not supported"
+          "Failed to get stream. Audio not shared or browser not supported"
           );
         }
       })
       .catch((err) => console.log("Unable to open capture: ", err));
+    } else if (visualizationSource === VISUALIZATION_SOURCES.FILE) {
+      const soundSrc = selectedFile.name.length
+      ? URL.createObjectURL(selectedFile)
+      : FILES[0];
+      stream = new Audio(soundSrc);
 
+      if (visualizationType === VISUALIZATION_TYPES.BAR) {
+        shouldStopBar = false;
+        shouldStopOs = true;
+        shouldStopCircle = true;
+      } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
+        shouldStopBar = true;
+        shouldStopOs = false;
+        shouldStopCircle = true;
+      } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
+        shouldStopBar = true;
+        shouldStopOs = true;
+        shouldStopCircle = false;
+      }
+
+      setTimeout(() => {
+        stream?.play();
+      }, 100);
+
+      var source = audioContext.createMediaElementSource(stream);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+    }
+    
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
 
-    drawOscillator();
+    if (visualizationType === VISUALIZATION_TYPES.BAR) {
+      drawBar();
+    } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
+      drawOscillator();
+    } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
+      drawCircle();
+    }
   };
 
   return (
     <Wrapper>
       <Title>visualizer</Title>
-      <StyledLabel>
-        <label>
-          {selectedFile && selectedFile.name !== ""
-            ? selectedFile.name
-            : "no file selected"}
-        </label>
-      </StyledLabel>
-      <InputWrapper>
-        <StyledButton onClick={handleClick}>upload</StyledButton>
-        <input
-          type="file"
-          ref={hiddenFileInput}
-          name="file"
-          onChange={handleFileUpload}
-          style={{ display: "none" }}
-        />
-      </InputWrapper>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
         height={HEIGHT}
       ></StyledCanvas>
       <SettingsWrapper>
-        <StyledButton onClick={oscillator}>oscillator</StyledButton>
-        <StyledButton onClick={bar}>bar</StyledButton>
-        <StyledButton onClick={circle}>circle</StyledButton>
-        <StyledButton onClick={microphoneSetup}>microphone setup</StyledButton>
-        {/* <StyledButton onClick={spotifySetup}>spotify setup</StyledButton> */}
+        <InputWrapper>
+          <label>
+            {selectedFile && selectedFile.name !== ""
+              ? selectedFile.name
+              : "no file selected"}
+          </label>
+          <StyledSecondaryButton onClick={handleClick}>
+            upload
+          </StyledSecondaryButton>
+          <input
+            type="file"
+            ref={hiddenFileInput}
+            name="file"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+            />
+        </InputWrapper>
+        <InputWrapper>
+          <label>source: </label>
+          <StyledSelect
+            id="visualization-source"
+            name="visualization-source"
+            onChange={(e) => {
+              handleVisualizationSource(e);
+            }}
+          >
+            {Object.keys(VISUALIZATION_SOURCES).map((key) => {
+              return (
+                <option key={key} value={VISUALIZATION_SOURCES[key]}>
+                  {VISUALIZATION_SOURCES[key]}
+                </option>
+              );
+            })}
+          </StyledSelect>
+        </InputWrapper>
+        <InputWrapper>
+          <label>type: </label>
+          <StyledSelect
+            id="visualization-type"
+            name="visualization-type"
+            onChange={(e) => {
+              handleVisualizationType(e);
+            }}
+          >
+            {Object.keys(VISUALIZATION_TYPES).map((key) => {
+              return (
+                <option key={key} value={VISUALIZATION_TYPES[key]}>
+                  {VISUALIZATION_TYPES[key]}
+                </option>
+              );
+            })}
+          </StyledSelect>
+        </InputWrapper>
         <InputWrapper>
           <label>theme: </label>
           <StyledSelect
@@ -354,7 +340,6 @@ export default function Home(props) {
             name="themes"
             onChange={(e) => {
               handleCanvasTheme(e);
-              selectTheme(e);
             }}
           >
             {Object.keys(THEMES).map((key) => {
@@ -366,6 +351,11 @@ export default function Home(props) {
             })}
           </StyledSelect>
         </InputWrapper>
+        <StyledButton
+          onClick={start}
+        >
+          start
+        </StyledButton>
       </SettingsWrapper>
     </Wrapper>
   );
@@ -390,7 +380,7 @@ const Title = styled.h1`
   color: ${({ theme }) => theme.primary};
 `;
 
-const StyledButton = styled.button`
+const StyledSecondaryButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
@@ -402,20 +392,23 @@ const StyledButton = styled.button`
   padding: 8px 20px;
 `;
 
+const StyledButton = styled.button`
+  display: flex;
+  width: fit-content;
+  align-self: center;
+  margin: 10px;
+  color: ${({ theme }) => theme.primary};
+  background-color: ${({ theme }) => theme.secondary};
+  border: 1px solid ${({ theme }) => theme.secondary};
+  border-radius: 12px;
+  padding: 8px 20px;
+`;
+
 const InputWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 10px;
-  color: ${({ theme }) => theme.primary};
-  background-color: ${({ theme }) => theme.background};
-`;
-
-const StyledLabel = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: -10px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.background};
 `;
