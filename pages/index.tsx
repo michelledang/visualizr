@@ -165,30 +165,37 @@ export default function Home(props) {
     ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    // use a delay for waveform only
+    // use a delay
     if (!shouldStopCircle) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawCircle);
       }, 50);
     }
 
-    analyser.getByteTimeDomainData(dataArray); //waveform data
-
+    analyser.getByteFrequencyData(dataArray); //frequency data
+    
     ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    ctx.strokeStyle = props.theme.secondary;
-    ctx.beginPath();
-
+    
     const BUFFER_LEN = dataArray.length;
     var x = 500;
     var y = 150;
-
+    
     for (var i = 0; i < BUFFER_LEN; i++) {
+      // larger ring with secondary colour
+      ctx.strokeStyle = props.theme.secondary;
+      ctx.beginPath();
       var radius = dataArray[i] / 5.0 + 50;
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    }
+      ctx.stroke();
 
-    ctx.stroke();
+      // smaller ring with tertiary colour
+      ctx.strokeStyle = props.theme.tertiary;
+      ctx.beginPath();
+      var radius = dataArray[i] / 5.0;
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
 
     if (shouldStopCircle) {
       if (stream) {

@@ -4,28 +4,28 @@ export default {
       background: '#fff',
       primary: '#000',
       secondary: '#36eb7b',
-      tertiary: '#fff',
+      tertiary: '#36ebd8',
     },
     gmk9009: {
       name: 'gmk 9009',
       background: '#d8d2c3',
       primary: '#768e72',
       secondary: '#c87e74',
-      tertiary: '#d9d2c8'
+      tertiary: '#768e72'
     },
     sakura: {
       name: 'sakura',
       background: '#ff98ac',
       primary: '#efefef',
       secondary: '#de1d57',
-      tertiary: '#917075'
+      tertiary: '#efefef'
     },
     olivia: {
       name: 'gmk olivia',
       background: '#363434',
       primary: '#e8c4b8',
       secondary: '#fafafa',
-      tertiary: '#fafafa'
+      tertiary: '#e8c4b8'
     },
     mizu: {
       name: 'gmk mizu',
