@@ -152,7 +152,7 @@ export default function Home(props) {
     var x = 0;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      barHeight = dataArray[i] * 4;
+      barHeight = dataArray[i] * 3;
 
       ctx.fillStyle = props.theme.secondary;
       ctx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight);
@@ -190,10 +190,9 @@ export default function Home(props) {
     var y = HEIGHT / 2;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      // larger ring with secondary colour
       ctx.strokeStyle = props.theme.secondary;
       ctx.beginPath();
-      var radius = dataArray[i] + 50;
+      var radius = dataArray[i] / 2 + 50;
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
       ctx.stroke();
 
@@ -222,7 +221,7 @@ export default function Home(props) {
     if (!shouldStopLissa) {
       setTimeout(() => {
         var drawVisual = requestAnimationFrame(drawLissajous);
-      }, 75);
+      }, 50);
     }
 
     analyser.getByteTimeDomainData(dataArray); //waveform data
@@ -232,12 +231,13 @@ export default function Home(props) {
     ctx.strokeStyle = props.theme.secondary;
 
     const BUFFER_LEN = dataArray.length;
+    var x, y;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
       ctx.beginPath();
       // rotating cube
-      var x = 300 * Math.abs(Math.sin(1 * t + dataArray[i]));
-      var y = 300 * Math.abs(Math.sin(3 * t + dataArray[i]));
+      x = 200 * Math.abs(Math.sin(1 * t + dataArray[i]));
+      y = 200 * Math.abs(Math.sin(3 * t + dataArray[i]));
       // rotating ellipse
       // var x = dataArray[i] / 2 * Math.abs(Math.sin(1*t));
       // var y = dataArray[i] / 2 * Math.abs(Math.sin(3*t+Math.PI/2));
