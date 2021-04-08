@@ -7,7 +7,7 @@ import ExpandIcon from "../components/ExpandIcon";
 
 export default function Home(props) {
   var audioContext;
-  var stream, analyser, dataArray, canvas, ctx;
+  var stream, analyser, dataArray, canvas, ctx, dataArray2;
   var WIDTH = 1000;
   var HEIGHT = 350;
   var t = 0;
@@ -26,6 +26,7 @@ export default function Home(props) {
     CIRCLE: "circle",
     LISSA: "lissajous",
     COLORS: "colors",
+    HARMONO: "harmono",
   };
 
   const VISUALIZATION_SOURCES = {
@@ -49,6 +50,7 @@ export default function Home(props) {
   var shouldStopCircle = false;
   var shouldStopLissa = false;
   var shouldStopColors = false;
+  var shouldStopHarmono = false;
 
   const handleStop = () => {
     shouldStopOs = true;
@@ -56,6 +58,7 @@ export default function Home(props) {
     shouldStopCircle = true;
     shouldStopLissa = true;
     shouldStopColors = true;
+    shouldStopHarmono = true;
   };
 
   const handleCanvasTheme = (event) => {
@@ -294,6 +297,67 @@ export default function Home(props) {
     }
   };
 
+  const drawHarmonograph = () => {
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // use a delay
+    if (!shouldStopHarmono) {
+      setTimeout(() => {
+        var drawVisual = requestAnimationFrame(drawHarmonograph);
+      }, 75);
+    }
+
+    analyser.getByteTimeDomainData(dataArray); //waveform data
+    analyser.getByteFrequencyData(dataArray2); //frequency data
+
+    ctx.fillStyle = props.theme.background;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.strokeStyle = props.theme.secondary;
+    ctx.fillStyle = props.theme.secondary;
+
+    const BUFFER_LEN = dataArray.length;
+
+    for (var i = 0; i < BUFFER_LEN; i++) {
+      ctx.beginPath();
+      // rotating cube
+      var y = dataArray2[i]; //frequency data
+      var x = dataArray[i]; //waveform data
+      // rotating ellipse
+      // var x = dataArray[i] / 2 * Math.abs(Math.sin(1*t));
+      // var y = dataArray[i] / 2 * Math.abs(Math.sin(3*t+Math.PI/2));
+
+      // DRAW 3 SKINNY ELLIPSE
+      // ctx.ellipse(WIDTH / 4, HEIGHT / 2, x / 2, y, 0, 0, 2 * Math.PI);
+      // ctx.ellipse((WIDTH * 2) / 4, HEIGHT / 2, x / 2, y, 0, 0, 2 * Math.PI);
+      // ctx.ellipse((WIDTH * 3) / 4, HEIGHT / 2, x / 2, y, 0, 0, 2 * Math.PI);
+
+      // DRAW WIDE ELLIPSE
+      // ctx.ellipse(WIDTH / 2, HEIGHT / 2, y * 3, x, 0, 0, 2 * Math.PI);
+
+      // DRAW GRID
+      ctx.fillStyle = props.theme.secondary;
+      ctx.fillRect((x * WIDTH) / 250, HEIGHT - y * 2 - 5, 5, 5);
+      // ctx.fillStyle = props.theme.tertiary;
+      // ctx.fillRect(x * 7, y * 2, 5, 5);
+      // ctx.fillStyle = props.theme.secondary;
+      // ctx.fillRect(WIDTH - y * 4 - 5, x * 2, 5, 5);
+      // ctx.fillStyle = props.theme.tertiary;
+      // ctx.fillRect(y * 4, x * 2, 5, 5);
+      ctx.stroke();
+    }
+
+    t += 0.01;
+
+    if (shouldStopHarmono) {
+      if (stream) {
+        stream.pause();
+      }
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+  };
+
   const setCanvasDimensions = () => {
     canvas = document.getElementById("visualization");
     ctx = canvas.getContext("2d");
@@ -361,32 +425,43 @@ export default function Home(props) {
         shouldStopCircle = true;
         shouldStopLissa = true;
         shouldStopColors = true;
+        shouldStopHarmono = true;
       } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
         shouldStopBar = true;
         shouldStopOs = false;
         shouldStopCircle = true;
         shouldStopLissa = true;
         shouldStopColors = true;
+        shouldStopHarmono = true;
       } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = false;
         shouldStopLissa = true;
         shouldStopColors = true;
+        shouldStopHarmono = true;
       } else if (visualizationType === VISUALIZATION_TYPES.LISSA) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = true;
         shouldStopLissa = false;
         shouldStopColors = true;
+        shouldStopHarmono = true;
       } else if (visualizationType === VISUALIZATION_TYPES.COLORS) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = true;
         shouldStopLissa = true;
         shouldStopColors = false;
+        shouldStopHarmono = true;
+      } else if (visualizationType === VISUALIZATION_TYPES.HARMONO) {
+        shouldStopBar = true;
+        shouldStopOs = true;
+        shouldStopCircle = true;
+        shouldStopLissa = true;
+        shouldStopColors = true;
+        shouldStopHarmono = false;
       }
-
       setTimeout(() => {
         stream?.play();
       }, 100);
@@ -399,6 +474,7 @@ export default function Home(props) {
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
+    dataArray2 = new Uint8Array(bufferLength);
 
     if (visualizationType === VISUALIZATION_TYPES.BAR) {
       drawBar();
@@ -410,6 +486,8 @@ export default function Home(props) {
       drawLissajous();
     } else if (visualizationType === VISUALIZATION_TYPES.COLORS) {
       drawColors();
+    } else if (visualizationType === VISUALIZATION_TYPES.HARMONO) {
+      drawHarmonograph();
     }
   };
 
