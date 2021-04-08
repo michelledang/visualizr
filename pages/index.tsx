@@ -565,6 +565,9 @@ const InputWrapper = styled.div`
 
 const StyledCanvas = styled.canvas`
   margin: 0 0 20px 0;
+  &:fullscreen {
+    background-color: ${({ theme }) => theme.background};
+  }
 `;
 
 const StyledSelect = styled.select`
