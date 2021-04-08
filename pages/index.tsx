@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { AudioContext } from "standardized-audio-context";
 import { useState } from "react";
 import THEMES from "../data/themes";
+import ExpandIcon from "../components/ExpandIcon";
 
 export default function Home(props) {
   var audioContext;
@@ -24,6 +25,7 @@ export default function Home(props) {
     BAR: "bar",
     CIRCLE: "circle",
     LISSA: "lissajous",
+    COLORS: "colors",
   };
 
   const VISUALIZATION_SOURCES = {
@@ -46,12 +48,14 @@ export default function Home(props) {
   var shouldStopBar = false;
   var shouldStopCircle = false;
   var shouldStopLissa = false;
+  var shouldStopColors = false;
 
   const handleStop = () => {
     shouldStopOs = true;
     shouldStopBar = true;
     shouldStopCircle = true;
     shouldStopLissa = true;
+    shouldStopColors = true;
   };
 
   const handleCanvasTheme = (event) => {
@@ -251,25 +255,65 @@ export default function Home(props) {
     }
   };
 
+  const drawColors = () => {
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // use a delay for waveform only
+    if (!shouldStopColors) {
+      var drawVisual = requestAnimationFrame(drawColors);
+    }
+
+    analyser.getByteFrequencyData(dataArray); //frequency data
+
+    ctx.fillStyle = props.theme.background;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    const BUFFER_LEN = dataArray.length;
+    var barWidth = (WIDTH / BUFFER_LEN) * 20;
+    var barHeight;
+    var x = 0;
+
+    for (var i = 0; i < BUFFER_LEN; i++) {
+      // barHeight = dataArray[i] * 2;
+      barHeight = HEIGHT;
+      ctx.globalAlpha = (dataArray[i] * 2) / HEIGHT;
+      ctx.fillStyle = props.theme.secondary;
+      ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+      x += barWidth;
+    }
+
+    if (shouldStopColors) {
+      if (stream) {
+        stream.pause();
+      }
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+      ctx.globalAlpha = 1;
+    }
+  };
+
   const setCanvasDimensions = () => {
     canvas = document.getElementById("visualization");
     ctx = canvas.getContext("2d");
 
-    // get current size of the canvas
-    let rect = canvas.getBoundingClientRect();
+    // get current size of the window
+    let w = window.innerWidth;
+    let h = window.innerHeight * 0.7;
 
     // increase the actual size of our canvas
-    canvas.width = rect.width * devicePixelRatio;
-    canvas.height = rect.height * devicePixelRatio;
+    canvas.width = w * devicePixelRatio;
+    canvas.height = h * devicePixelRatio;
 
     // ensure all drawing operations are scaled
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
     // scale everything down using CSS
-    canvas.style.width = rect.width + "px";
-    canvas.style.height = rect.height + "px";
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
 
-    return [rect.width, rect.height];
+    return [w, h];
   };
 
   const start = () => {
@@ -316,21 +360,31 @@ export default function Home(props) {
         shouldStopOs = true;
         shouldStopCircle = true;
         shouldStopLissa = true;
+        shouldStopColors = true;
       } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
         shouldStopBar = true;
         shouldStopOs = false;
         shouldStopCircle = true;
         shouldStopLissa = true;
+        shouldStopColors = true;
       } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = false;
         shouldStopLissa = true;
+        shouldStopColors = true;
       } else if (visualizationType === VISUALIZATION_TYPES.LISSA) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = true;
         shouldStopLissa = false;
+        shouldStopColors = true;
+      } else if (visualizationType === VISUALIZATION_TYPES.COLORS) {
+        shouldStopBar = true;
+        shouldStopOs = true;
+        shouldStopCircle = true;
+        shouldStopLissa = true;
+        shouldStopColors = false;
       }
 
       setTimeout(() => {
@@ -354,13 +408,28 @@ export default function Home(props) {
       drawCircle();
     } else if (visualizationType === VISUALIZATION_TYPES.LISSA) {
       drawLissajous();
+    } else if (visualizationType === VISUALIZATION_TYPES.COLORS) {
+      drawColors();
+    }
+  };
+
+  const fullscreen = () => {
+    canvas = document.getElementById("visualization");
+    if (canvas.webkitRequestFullScreen) {
+      canvas.webkitRequestFullScreen();
+    } else {
+      canvas.mozRequestFullScreen();
     }
   };
 
   return (
     <Wrapper>
       <Title>visualizer</Title>
-      <StyledCanvas id="visualization"></StyledCanvas>
+      <StyledCanvas
+        id="visualization"
+        width={WIDTH}
+        height={HEIGHT}
+      ></StyledCanvas>
       <SettingsWrapper>
         <InputWrapper>
           <label>
@@ -434,6 +503,9 @@ export default function Home(props) {
           </StyledSelect>
         </InputWrapper>
         <StyledButton onClick={start}>start</StyledButton>
+        <StyledIconWrapper onClick={fullscreen}>
+          <StyledExpandIcon />
+        </StyledIconWrapper>
       </SettingsWrapper>
     </Wrapper>
   );
@@ -446,10 +518,10 @@ const Wrapper = styled.div`
 `;
 
 const SettingsWrapper = styled.div`
-  width: 800px;
   display: flex;
   align-self: center;
   justify-content: space-around;
+  align-items: center;
 `;
 
 const Title = styled.h1`
@@ -493,8 +565,6 @@ const InputWrapper = styled.div`
 
 const StyledCanvas = styled.canvas`
   margin: 0 0 20px 0;
-  width: 100%;
-  height: 70%;
 `;
 
 const StyledSelect = styled.select`
@@ -504,4 +574,16 @@ const StyledSelect = styled.select`
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 8px;
+`;
+
+const StyledExpandIcon = styled(ExpandIcon)`
+  width: 20px;
+  height: 20px;
+  color: ${({ theme }) => theme.primary};
+`;
+
+const StyledIconWrapper = styled.div`
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
 `;
