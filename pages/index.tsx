@@ -9,6 +9,7 @@ export default function Home(props) {
   var stream, analyser, dataArray, canvas, ctx;
   const WIDTH = 1000;
   const HEIGHT = 350;
+  var t = 0;
 
   const FILES = [
     "/audio/file1.mp3",
@@ -22,6 +23,7 @@ export default function Home(props) {
     OSCILLATOR: "oscillator",
     BAR: "bar",
     CIRCLE: "circle",
+    LISSA: "lissajous",
   };
 
   const VISUALIZATION_SOURCES = {
@@ -43,11 +45,13 @@ export default function Home(props) {
   var shouldStopOs = false;
   var shouldStopBar = false;
   var shouldStopCircle = false;
+  var shouldStopLissa = false;
 
   const handleStop = () => {
     shouldStopOs = true;
     shouldStopBar = true;
     shouldStopCircle = true;
+    shouldStopLissa = true;
   };
 
   const handleCanvasTheme = (event) => {
@@ -179,7 +183,7 @@ export default function Home(props) {
     
     const BUFFER_LEN = dataArray.length;
     var x = 500;
-    var y = 150;
+    var y = 175;
     
     for (var i = 0; i < BUFFER_LEN; i++) {
       // larger ring with secondary colour
@@ -198,6 +202,48 @@ export default function Home(props) {
     }
 
     if (shouldStopCircle) {
+      if (stream) {
+        stream.pause();
+      }
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    }
+  };
+  
+  const drawLissajous = () => {
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    // use a delay
+    if (!shouldStopLissa) {
+      setTimeout(() => {
+        var drawVisual = requestAnimationFrame(drawLissajous);
+      }, 75);
+    }
+
+    analyser.getByteTimeDomainData(dataArray); //waveform data
+    
+    ctx.fillStyle = props.theme.background;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.strokeStyle = props.theme.secondary;
+    
+    const BUFFER_LEN = dataArray.length;
+    
+    for (var i = 0; i < BUFFER_LEN; i++) {
+      ctx.beginPath();
+      // rotating cube
+      var x = 150 * Math.abs(Math.sin(1*t+dataArray[i]));
+      var y = 150 * Math.abs(Math.sin(3*t+dataArray[i]));
+      // rotating ellipse
+      // var x = dataArray[i] / 2 * Math.abs(Math.sin(1*t));
+      // var y = dataArray[i] / 2 * Math.abs(Math.sin(3*t+Math.PI/2));
+      ctx.ellipse(500, 175, x, y, 90, 0, 2*Math.PI);
+      ctx.stroke();
+    }
+
+    t += 0.01
+
+    if (shouldStopLissa) {
       if (stream) {
         stream.pause();
       }
@@ -246,14 +292,22 @@ export default function Home(props) {
         shouldStopBar = false;
         shouldStopOs = true;
         shouldStopCircle = true;
+        shouldStopLissa = true;
       } else if (visualizationType === VISUALIZATION_TYPES.OSCILLATOR) {
         shouldStopBar = true;
         shouldStopOs = false;
         shouldStopCircle = true;
+        shouldStopLissa = true;
       } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
         shouldStopBar = true;
         shouldStopOs = true;
         shouldStopCircle = false;
+        shouldStopLissa = true;
+      } else if (visualizationType === VISUALIZATION_TYPES.LISSA) {
+        shouldStopBar = true;
+        shouldStopOs = true;
+        shouldStopCircle = true;
+        shouldStopLissa = false;
       }
 
       setTimeout(() => {
@@ -275,6 +329,8 @@ export default function Home(props) {
       drawOscillator();
     } else if (visualizationType === VISUALIZATION_TYPES.CIRCLE) {
       drawCircle();
+    } else if (visualizationType === VISUALIZATION_TYPES.LISSA) {
+      drawLissajous();
     }
   };
 
