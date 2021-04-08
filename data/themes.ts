@@ -34,4 +34,11 @@ export default {
       secondary: '#b9d9eb',
       tertiary: '#a5c1d1'
     },
+    carbon: {
+      name: 'gmk carbon',
+      background: '#464746',
+      primary: '#e86700',
+      secondary: '#e3d5b9',
+      tertiary: '#a5c1d1'
+    },
 };
