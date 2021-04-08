@@ -7,8 +7,8 @@ import THEMES from "../data/themes";
 export default function Home(props) {
   var audioContext;
   var stream, analyser, dataArray, canvas, ctx;
-  const WIDTH = 1000;
-  const HEIGHT = 350;
+  var WIDTH = 1000;
+  var HEIGHT = 350;
   var t = 0;
 
   const FILES = [
@@ -74,7 +74,7 @@ export default function Home(props) {
     setSelectedFile(event.target.files[0]);
     handleStop();
   };
-  
+
   const handleClick = () => {
     hiddenFileInput.current.click();
   };
@@ -148,7 +148,7 @@ export default function Home(props) {
     var x = 0;
 
     for (var i = 0; i < BUFFER_LEN; i++) {
-      barHeight = dataArray[i] * 2;
+      barHeight = dataArray[i] * 4;
 
       ctx.fillStyle = props.theme.secondary;
       ctx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight);
@@ -177,28 +177,28 @@ export default function Home(props) {
     }
 
     analyser.getByteFrequencyData(dataArray); //frequency data
-    
+
     ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    
+
     const BUFFER_LEN = dataArray.length;
-    var x = 500;
-    var y = 175;
-    
+    var x = WIDTH / 2;
+    var y = HEIGHT / 2;
+
     for (var i = 0; i < BUFFER_LEN; i++) {
       // larger ring with secondary colour
       ctx.strokeStyle = props.theme.secondary;
       ctx.beginPath();
-      var radius = dataArray[i] / 5.0 + 50;
+      var radius = dataArray[i] + 50;
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
       ctx.stroke();
 
       // smaller ring with tertiary colour
-      ctx.strokeStyle = props.theme.tertiary;
-      ctx.beginPath();
-      var radius = dataArray[i] / 5.0;
-      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.stroke();
+      // ctx.strokeStyle = props.theme.tertiary;
+      // ctx.beginPath();
+      // var radius = dataArray[i];
+      // ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      // ctx.stroke();
     }
 
     if (shouldStopCircle) {
@@ -208,7 +208,7 @@ export default function Home(props) {
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
   };
-  
+
   const drawLissajous = () => {
     canvas = document.getElementById("visualization");
     ctx = canvas.getContext("2d");
@@ -222,26 +222,26 @@ export default function Home(props) {
     }
 
     analyser.getByteTimeDomainData(dataArray); //waveform data
-    
+
     ctx.fillStyle = props.theme.background;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.strokeStyle = props.theme.secondary;
-    
+
     const BUFFER_LEN = dataArray.length;
-    
+
     for (var i = 0; i < BUFFER_LEN; i++) {
       ctx.beginPath();
       // rotating cube
-      var x = 150 * Math.abs(Math.sin(1*t+dataArray[i]));
-      var y = 150 * Math.abs(Math.sin(3*t+dataArray[i]));
+      var x = 300 * Math.abs(Math.sin(1 * t + dataArray[i]));
+      var y = 300 * Math.abs(Math.sin(3 * t + dataArray[i]));
       // rotating ellipse
       // var x = dataArray[i] / 2 * Math.abs(Math.sin(1*t));
       // var y = dataArray[i] / 2 * Math.abs(Math.sin(3*t+Math.PI/2));
-      ctx.ellipse(500, 175, x, y, 90, 0, 2*Math.PI);
+      ctx.ellipse(WIDTH / 2, HEIGHT / 2, x, y, 90, 0, 2 * Math.PI);
       ctx.stroke();
     }
 
-    t += 0.01
+    t += 0.01;
 
     if (shouldStopLissa) {
       if (stream) {
@@ -251,7 +251,30 @@ export default function Home(props) {
     }
   };
 
+  const setCanvasDimensions = () => {
+    canvas = document.getElementById("visualization");
+    ctx = canvas.getContext("2d");
+
+    // get current size of the canvas
+    let rect = canvas.getBoundingClientRect();
+
+    // increase the actual size of our canvas
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+
+    // ensure all drawing operations are scaled
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    // scale everything down using CSS
+    canvas.style.width = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+
+    return [rect.width, rect.height];
+  };
+
   const start = () => {
+    [WIDTH, HEIGHT] = setCanvasDimensions();
+
     if (stream) {
       handleStop();
       stream.pause();
@@ -265,27 +288,27 @@ export default function Home(props) {
 
     if (visualizationSource === VISUALIZATION_SOURCES.MICROPHONE) {
       navigator.mediaDevices
-      .getUserMedia({
-        video: false,
-        audio: true,
-      })
-      .then((stream) => {
-        if (stream.getAudioTracks().length > 0) {
-          var source = audioContext.createMediaStreamSource(stream);
-          source.connect(analyser);
-          
-          document.body.classList.add("ready");
-        } else {
-          console.log(
-          "Failed to get stream. Audio not shared or browser not supported"
-          );
-        }
-      })
-      .catch((err) => console.log("Unable to open capture: ", err));
+        .getUserMedia({
+          video: false,
+          audio: true,
+        })
+        .then((stream) => {
+          if (stream.getAudioTracks().length > 0) {
+            var source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+
+            document.body.classList.add("ready");
+          } else {
+            console.log(
+              "Failed to get stream. Audio not shared or browser not supported"
+            );
+          }
+        })
+        .catch((err) => console.log("Unable to open capture: ", err));
     } else if (visualizationSource === VISUALIZATION_SOURCES.FILE) {
       const soundSrc = selectedFile.name.length
-      ? URL.createObjectURL(selectedFile)
-      : FILES[0];
+        ? URL.createObjectURL(selectedFile)
+        : FILES[0];
       stream = new Audio(soundSrc);
 
       if (visualizationType === VISUALIZATION_TYPES.BAR) {
@@ -318,7 +341,7 @@ export default function Home(props) {
       source.connect(analyser);
       analyser.connect(audioContext.destination);
     }
-    
+
     analyser.fftSize = 2048;
     var bufferLength = analyser.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
@@ -337,11 +360,7 @@ export default function Home(props) {
   return (
     <Wrapper>
       <Title>visualizer</Title>
-      <StyledCanvas
-        id="visualization"
-        width={WIDTH}
-        height={HEIGHT}
-      ></StyledCanvas>
+      <StyledCanvas id="visualization"></StyledCanvas>
       <SettingsWrapper>
         <InputWrapper>
           <label>
@@ -358,7 +377,7 @@ export default function Home(props) {
             name="file"
             onChange={handleFileUpload}
             style={{ display: "none" }}
-            />
+          />
         </InputWrapper>
         <InputWrapper>
           <label>source: </label>
@@ -414,11 +433,7 @@ export default function Home(props) {
             })}
           </StyledSelect>
         </InputWrapper>
-        <StyledButton
-          onClick={start}
-        >
-          start
-        </StyledButton>
+        <StyledButton onClick={start}>start</StyledButton>
       </SettingsWrapper>
     </Wrapper>
   );
@@ -478,6 +493,8 @@ const InputWrapper = styled.div`
 
 const StyledCanvas = styled.canvas`
   margin: 0 0 20px 0;
+  width: 100%;
+  height: 70%;
 `;
 
 const StyledSelect = styled.select`
