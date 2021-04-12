@@ -1,6 +1,7 @@
 import { createGlobalStyle, ThemeProvider } from "styled-components";
 import { useState } from "react";
 import THEMES from "../data/themes";
+import Head from "next/head";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -26,6 +27,10 @@ export default function App({ Component, pageProps }) {
     <>
       <GlobalStyle background={THEMES[currentTheme].background} />
       <ThemeProvider theme={THEMES[currentTheme]}>
+        <Head>
+          <title>visualizr</title>
+          <link rel="shortcut icon" href="/favicon.ico" />
+        </Head>
         <Component
           selectTheme={(themeName) => selectTheme(themeName)}
           theme={THEMES[currentTheme]}

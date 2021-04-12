@@ -26,7 +26,7 @@ export default function Home(props) {
     CIRCLE: "circle",
     LISSA: "lissajous",
     COLORS: "colors",
-    HARMONO: "harmono",
+    HARMONO: "plot",
   };
 
   const VISUALIZATION_SOURCES = {
