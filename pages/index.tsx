@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import { AudioContext } from "standardized-audio-context";
-import { useState } from "react";
-import THEMES from "../data/themes";
-import ExpandIcon from "../components/ExpandIcon";
+import React from 'react';
+import styled from 'styled-components';
+import { AudioContext } from 'standardized-audio-context';
+import { useState } from 'react';
+import THEMES from '../data/themes';
+import ExpandIcon from '../components/ExpandIcon';
 
 export default function Home(props) {
   var audioContext;
@@ -13,28 +13,28 @@ export default function Home(props) {
   var t = 0;
 
   const FILES = [
-    "/audio/file1.mp3",
-    "/audio/file2.mp3",
-    "/audio/sine440.wav",
-    "/audio/square440.wav",
-    "/audio/sawtooth440.wav",
+    '/audio/file1.mp3',
+    '/audio/file2.mp3',
+    '/audio/sine440.wav',
+    '/audio/square440.wav',
+    '/audio/sawtooth440.wav',
   ];
 
   const VISUALIZATION_TYPES = {
-    OSCILLATOR: "oscillator",
-    BAR: "bar",
-    CIRCLE: "circle",
-    LISSA: "lissajous",
-    COLORS: "colors",
-    HARMONO: "plot",
+    OSCILLATOR: 'oscillator',
+    BAR: 'bar',
+    CIRCLE: 'circle',
+    LISSA: 'lissajous',
+    COLORS: 'colors',
+    HARMONO: 'plot',
   };
 
   const VISUALIZATION_SOURCES = {
-    FILE: "file",
-    MICROPHONE: "microphone",
+    FILE: 'file',
+    MICROPHONE: 'microphone',
   };
 
-  const [selectedFile, setSelectedFile] = useState({ name: "" });
+  const [selectedFile, setSelectedFile] = useState({ name: '' });
   const [visualizationType, setVisualizationType] = useState(
     VISUALIZATION_TYPES.OSCILLATOR
   );
@@ -42,7 +42,7 @@ export default function Home(props) {
     VISUALIZATION_SOURCES.FILE
   );
   const { selectTheme } = props;
-  var canvasTheme = "default";
+  var canvasTheme = 'default';
   const hiddenFileInput = React.useRef(null);
 
   var shouldStopOs = false;
@@ -76,6 +76,7 @@ export default function Home(props) {
     setVisualizationSource(event.target.value);
     handleStop();
   };
+  ('');
 
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -87,8 +88,8 @@ export default function Home(props) {
   };
 
   const drawOscillator = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
@@ -135,8 +136,8 @@ export default function Home(props) {
   };
 
   const drawBar = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
@@ -172,8 +173,8 @@ export default function Home(props) {
   };
 
   const drawCircle = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay
@@ -216,8 +217,8 @@ export default function Home(props) {
   };
 
   const drawLissajous = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay
@@ -259,8 +260,8 @@ export default function Home(props) {
   };
 
   const drawColors = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay for waveform only
@@ -298,8 +299,8 @@ export default function Home(props) {
   };
 
   const drawHarmonograph = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     // use a delay
@@ -359,8 +360,8 @@ export default function Home(props) {
   };
 
   const setCanvasDimensions = () => {
-    canvas = document.getElementById("visualization");
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById('visualization');
+    ctx = canvas.getContext('2d');
 
     // get current size of the window
     let w = window.innerWidth;
@@ -374,8 +375,8 @@ export default function Home(props) {
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
     // scale everything down using CSS
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
 
     return [w, h];
   };
@@ -405,14 +406,14 @@ export default function Home(props) {
             var source = audioContext.createMediaStreamSource(stream);
             source.connect(analyser);
 
-            document.body.classList.add("ready");
+            document.body.classList.add('ready');
           } else {
             console.log(
-              "Failed to get stream. Audio not shared or browser not supported"
+              'Failed to get stream. Audio not shared or browser not supported'
             );
           }
         })
-        .catch((err) => console.log("Unable to open capture: ", err));
+        .catch((err) => console.log('Unable to open capture: ', err));
     } else if (visualizationSource === VISUALIZATION_SOURCES.FILE) {
       const soundSrc = selectedFile.name.length
         ? URL.createObjectURL(selectedFile)
@@ -492,7 +493,7 @@ export default function Home(props) {
   };
 
   const fullscreen = () => {
-    canvas = document.getElementById("visualization");
+    canvas = document.getElementById('visualization');
     if (canvas.webkitRequestFullScreen) {
       canvas.webkitRequestFullScreen();
     } else {
@@ -502,7 +503,7 @@ export default function Home(props) {
 
   return (
     <Wrapper>
-      <Title>visualizer</Title>
+      <Title>visualizr</Title>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
@@ -511,9 +512,9 @@ export default function Home(props) {
       <SettingsWrapper>
         <InputWrapper>
           <label>
-            {selectedFile && selectedFile.name !== ""
+            {selectedFile && selectedFile.name !== ''
               ? selectedFile.name
-              : "no file selected"}
+              : 'no file selected'}
           </label>
           <StyledSecondaryButton onClick={handleClick}>
             upload
@@ -523,7 +524,7 @@ export default function Home(props) {
             ref={hiddenFileInput}
             name="file"
             onChange={handleFileUpload}
-            style={{ display: "none" }}
+            style={{ display: 'none' }}
           />
         </InputWrapper>
         <InputWrapper>
