@@ -604,8 +604,10 @@ const SettingsWrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 40px;
+  font-size: 24px;
   text-align: center;
+  letter-spacing: 50px;
+  margin-top: 30px;
   color: ${({ theme }) => theme.primary};
 `;
 
