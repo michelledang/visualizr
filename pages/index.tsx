@@ -365,7 +365,7 @@ export default function Home(props) {
 
     // get current size of the window
     let w = window.innerWidth;
-    let h = window.innerHeight * 0.7;
+    let h = window.innerHeight;
 
     // increase the actual size of our canvas
     canvas.width = w * devicePixelRatio;
@@ -528,7 +528,7 @@ export default function Home(props) {
           />
         </InputWrapper>
         <InputWrapper>
-          <label>source: </label>
+          <label>source</label>
           <StyledSelect
             id="visualization-source"
             name="visualization-source"
@@ -546,7 +546,7 @@ export default function Home(props) {
           </StyledSelect>
         </InputWrapper>
         <InputWrapper>
-          <label>type: </label>
+          <label>type</label>
           <StyledSelect
             id="visualization-type"
             name="visualization-type"
@@ -564,7 +564,7 @@ export default function Home(props) {
           </StyledSelect>
         </InputWrapper>
         <InputWrapper>
-          <label>theme: </label>
+          <label>theme</label>
           <StyledSelect
             id="themes"
             name="themes"
@@ -600,14 +600,20 @@ const SettingsWrapper = styled.div`
   display: flex;
   align-self: center;
   justify-content: space-around;
-  align-items: center;
+  align-items: end;
+  position: fixed;
+  bottom: 5%;
 `;
 
 const Title = styled.h1`
   font-size: 24px;
   text-align: center;
-  letter-spacing: 50px;
+  letter-spacing: 2em;
   margin-top: 30px;
+  margin-left: 25px;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
   color: ${({ theme }) => theme.primary};
 `;
 
@@ -615,37 +621,38 @@ const StyledSecondaryButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
-  margin: 10px;
+  margin: 0 10px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.background};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
-  padding: 8px 20px;
+  padding: 7px 20px;
 `;
 
 const StyledButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
-  margin: 10px;
+  margin: 0 10px 16px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.secondary};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
-  padding: 8px 20px;
+  padding: 7px 20px;
 `;
 
 const InputWrapper = styled.div`
   display: flex;
+  flex-direction: column-reverse;
   align-items: center;
   justify-content: center;
-  margin: 10px;
+  margin: 0 10px;
+  font-size: 12px;
   color: ${({ theme }) => theme.primary};
-  background-color: ${({ theme }) => theme.background};
+  background-color: transparent;
 `;
 
 const StyledCanvas = styled.canvas`
-  margin: 0 0 20px 0;
   &:fullscreen {
     background-color: ${({ theme }) => theme.background};
   }
@@ -663,6 +670,7 @@ const StyledSelect = styled.select`
 const StyledExpandIcon = styled(ExpandIcon)`
   width: 20px;
   height: 20px;
+  margin-top: 8px;
   color: ${({ theme }) => theme.primary};
 `;
 
