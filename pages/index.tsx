@@ -521,11 +521,11 @@ export default function Home(props) {
       ></StyledCanvas>
       <SettingsWrapper>
         <InputWrapper>
-          <label>
+          <StyledLabel>
             {selectedFile && selectedFile.name !== ''
               ? selectedFile.name
               : 'no file selected'}
-          </label>
+          </StyledLabel>
           <StyledSecondaryButton onClick={handleClick}>
             upload
           </StyledSecondaryButton>
@@ -538,7 +538,7 @@ export default function Home(props) {
           />
         </InputWrapper>
         <InputWrapper>
-          <label>source</label>
+          <StyledLabel>source</StyledLabel>
           <StyledSelect
             id="visualization-source"
             name="visualization-source"
@@ -556,7 +556,7 @@ export default function Home(props) {
           </StyledSelect>
         </InputWrapper>
         <InputWrapper>
-          <label>type</label>
+          <StyledLabel>type</StyledLabel>
           <StyledSelect
             id="visualization-type"
             name="visualization-type"
@@ -574,7 +574,7 @@ export default function Home(props) {
           </StyledSelect>
         </InputWrapper>
         <InputWrapper>
-          <label>theme</label>
+          <StyledLabel>theme</StyledLabel>
           <StyledSelect
             id="themes"
             name="themes"
@@ -662,11 +662,12 @@ const StyledButton = styled.button`
   align-self: center;
   justify-content: center;
   margin: 0 10px 16px;
-  color: ${({ theme }) => theme.primary};
+  color: ${({ theme }) => theme.background};
   background-color: ${({ theme }) => theme.secondary};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 20px;
+  font-weight: 600;
   @media only screen and (max-width: 768px) {
     width: 110px;
     margin: 0 0 24px;
@@ -750,4 +751,8 @@ const GithubIconWrapper = styled.a`
 const GithubIcon = styled.img`
   width: 20px;
   height: 20px;
+`;
+
+const StyledLabel = styled.label`
+  color: ${({ theme }) => theme.secondary};
 `;
