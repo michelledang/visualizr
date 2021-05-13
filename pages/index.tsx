@@ -508,6 +508,12 @@ export default function Home(props) {
   return (
     <Wrapper>
       <Title>visualizr</Title>
+      <GithubIconWrapper
+        href={'https://github.com/michelledang/visualizr'}
+        target="_blank"
+      >
+        <GithubIcon src={'/github.svg'} alt={'GitHub Link'}></GithubIcon>
+      </GithubIconWrapper>
       <StyledCanvas
         id="visualization"
         width={WIDTH}
@@ -724,4 +730,22 @@ const StyledIconWrapper = styled.div`
     width: 110px;
     margin: 0 0 8px;
   }
+`;
+
+const GithubIconWrapper = styled.a`
+  position: fixed;
+  @media only screen and (min-width: 768px) {
+    right: 20px;
+    top: 20px;
+  }
+  @media only screen and (max-width: 768px) {
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+`;
+
+const GithubIcon = styled.img`
+  width: 20px;
+  height: 20px;
 `;

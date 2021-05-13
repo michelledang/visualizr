@@ -1,7 +1,7 @@
-import { createGlobalStyle, ThemeProvider } from "styled-components";
-import { useState } from "react";
-import THEMES from "../data/themes";
-import Head from "next/head";
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { useState } from 'react';
+import THEMES from '../data/themes';
+import Head from 'next/head';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -19,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 export default function App({ Component, pageProps }) {
-  const [currentTheme, setCurrentTheme] = useState("default");
+  const [currentTheme, setCurrentTheme] = useState('default');
   const selectTheme = (themeName) => {
     setCurrentTheme(themeName);
   };
@@ -30,6 +30,20 @@ export default function App({ Component, pageProps }) {
         <Head>
           <title>visualizr</title>
           <link rel="shortcut icon" href="/favicon.ico" />
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-ZCRLWNW976"
+          ></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-ZCRLWNW976');
+            `,
+            }}
+          />
         </Head>
         <Component
           selectTheme={(themeName) => selectTheme(themeName)}
