@@ -8,8 +8,8 @@ import ExpandIcon from '../components/ExpandIcon';
 export default function Home(props) {
   var audioContext;
   var stream, analyser, dataArray, canvas, ctx, dataArray2;
-  var WIDTH = 1000;
-  var HEIGHT = 350;
+  var WIDTH = 0;
+  var HEIGHT = 0;
   var t = 0;
 
   const FILES = [
@@ -364,8 +364,11 @@ export default function Home(props) {
     ctx = canvas.getContext('2d');
 
     // get current size of the window
-    let w = window.innerWidth;
-    let h = window.innerHeight;
+    let w = window.innerWidth * 0.8;
+    let h =
+      window.innerWidth <= 768
+        ? window.innerHeight * 0.4
+        : window.innerHeight * 0.8;
 
     // increase the actual size of our canvas
     canvas.width = w * devicePixelRatio;
@@ -494,6 +497,7 @@ export default function Home(props) {
 
   const fullscreen = () => {
     canvas = document.getElementById('visualization');
+    [WIDTH, HEIGHT] = setCanvasDimensions();
     if (canvas.webkitRequestFullScreen) {
       canvas.webkitRequestFullScreen();
     } else {
@@ -602,43 +606,64 @@ const SettingsWrapper = styled.div`
   justify-content: space-around;
   align-items: end;
   position: fixed;
-  bottom: 5%;
+  bottom: 2%;
+  text-align-last: center;
+  @media only screen and (max-width: 768px) {
+    font-size: 18px;
+    flex-wrap: wrap;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 24px;
   text-align: center;
   letter-spacing: 2em;
-  margin-top: 30px;
+  margin-top: 36px;
   margin-left: 25px;
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
   color: ${({ theme }) => theme.primary};
+  @media only screen and (max-width: 768px) {
+    font-size: 18px;
+    letter-spacing: 1em;
+    margin-top: 20px;
+    margin-left: 9px;
+  }
 `;
 
 const StyledSecondaryButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
+  justify-content: center;
   margin: 0 10px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.background};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 20px;
+  @media only screen and (max-width: 768px) {
+    width: 110px;
+    margin: 0px;
+  }
 `;
 
 const StyledButton = styled.button`
   display: flex;
   width: fit-content;
   align-self: center;
+  justify-content: center;
   margin: 0 10px 16px;
   color: ${({ theme }) => theme.primary};
   background-color: ${({ theme }) => theme.secondary};
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 20px;
+  @media only screen and (max-width: 768px) {
+    width: 110px;
+    margin: 0 0 32px;
+  }
 `;
 
 const InputWrapper = styled.div`
@@ -650,11 +675,24 @@ const InputWrapper = styled.div`
   font-size: 12px;
   color: ${({ theme }) => theme.primary};
   background-color: transparent;
+  @media only screen and (max-width: 768px) {
+    margin: 0 0 8px;
+  }
 `;
 
 const StyledCanvas = styled.canvas`
+  border: 1px solid ${({ theme }) => theme.primary};
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   &:fullscreen {
     background-color: ${({ theme }) => theme.background};
+  }
+  @media only screen and (max-width: 768px) {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -70%);
   }
 `;
 
@@ -665,6 +703,10 @@ const StyledSelect = styled.select`
   border: 1px solid ${({ theme }) => theme.secondary};
   border-radius: 12px;
   padding: 7px 8px;
+  @media only screen and (max-width: 768px) {
+    width: 110px;
+    margin: 0;
+  }
 `;
 
 const StyledExpandIcon = styled(ExpandIcon)`
@@ -678,4 +720,8 @@ const StyledIconWrapper = styled.div`
   width: 20px;
   height: 20px;
   margin-left: 4px;
+  @media only screen and (max-width: 768px) {
+    width: 110px;
+    margin: 0 0 8px;
+  }
 `;
