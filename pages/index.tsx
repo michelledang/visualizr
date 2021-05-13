@@ -617,6 +617,7 @@ const SettingsWrapper = styled.div`
   @media only screen and (max-width: 768px) {
     font-size: 18px;
     flex-wrap: wrap;
+    bottom: 3%;
   }
 `;
 
@@ -668,7 +669,7 @@ const StyledButton = styled.button`
   padding: 7px 20px;
   @media only screen and (max-width: 768px) {
     width: 110px;
-    margin: 0 0 32px;
+    margin: 0 0 24px;
   }
 `;
 
@@ -726,6 +727,7 @@ const StyledIconWrapper = styled.div`
   width: 20px;
   height: 20px;
   margin-left: 4px;
+  align-self: start;
   @media only screen and (max-width: 768px) {
     width: 110px;
     margin: 0 0 8px;

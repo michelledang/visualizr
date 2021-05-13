@@ -28,6 +28,12 @@ export default function App({ Component, pageProps }) {
       <GlobalStyle background={THEMES[currentTheme].background} />
       <ThemeProvider theme={THEMES[currentTheme]}>
         <Head>
+          <meta property="og:title" content="visualizr" />
+          <meta property="og:image" content="/preview.jpg" />
+          <meta
+            property="og:description"
+            content="Real-time audio visualizer."
+          />
           <title>visualizr</title>
           <link rel="shortcut icon" href="/favicon.ico" />
           <script
